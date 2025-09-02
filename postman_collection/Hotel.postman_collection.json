@@ -1,0 +1,1811 @@
+{
+	"info": {
+		"_postman_id": "d2a84846-7e51-4f5a-a563-14c55c43a328",
+		"name": "Hotel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29401253",
+		"_collection_link": "https://gold-equinox-393862.postman.co/workspace/dba95db3-24a3-4deb-a8d8-5888d68766d9/collection/29401253-d2a84846-7e51-4f5a-a563-14c55c43a328?action=share&source=collection_link&creator=29401253"
+	},
+	"item": [
+		{
+			"name": "Country",
+			"item": [
+				{
+					"name": "getCountryList",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/countries/list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"list"
+							],
+							"query": [
+								{
+									"key": "draft",
+									"value": "0",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_deleted",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_updated",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Check Availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/countries/check-availability?code=USA ss",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"check-availability"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "USA ss",
+									"description": "Accept string"
+								},
+								{
+									"key": "name",
+									"value": "United States ss",
+									"description": "Accept string",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/v1/api/v1/countries/history",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"api",
+								"v1",
+								"countries",
+								"history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountrySummary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/admin/countries/summary",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"countries",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryListDatatable",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/api/v1/countries/list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"api",
+								"v1",
+								"countries",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryListDatatable2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/api/v1/countries/datatable?draw=1&start=0&length=10&search[value]=RAS&columns[0][data]=id&columns[0][search][value]=&columns[1][data]=code&columns[1][search][value]=&columns[2][data]=name&columns[2][search][value]=&order[0][column]=0&order[0][dir]=asc",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"api",
+								"v1",
+								"countries",
+								"datatable"
+							],
+							"query": [
+								{
+									"key": "draw",
+									"value": "1",
+									"description": "Draw counter, typically starts at 1"
+								},
+								{
+									"key": "start",
+									"value": "0",
+									"description": "Starting point (offset) for pagination"
+								},
+								{
+									"key": "length",
+									"value": "10",
+									"description": "Number of records to display per page"
+								},
+								{
+									"key": "search[value]",
+									"value": "RAS",
+									"description": "Global search value (empty for none)"
+								},
+								{
+									"key": "columns[0][data]",
+									"value": "id",
+									"description": "Column name for the first column"
+								},
+								{
+									"key": "columns[0][search][value]",
+									"value": "",
+									"description": "Search value for the first column"
+								},
+								{
+									"key": "columns[1][data]",
+									"value": "code",
+									"description": "Column name for the second column"
+								},
+								{
+									"key": "columns[1][search][value]",
+									"value": "",
+									"description": "Search value for the second column"
+								},
+								{
+									"key": "columns[2][data]",
+									"value": "name",
+									"description": "Column name for the third column"
+								},
+								{
+									"key": "columns[2][search][value]",
+									"value": "",
+									"description": "Search value for the third column"
+								},
+								{
+									"key": "order[0][column]",
+									"value": "0",
+									"description": "Column index to order by (0 for id)"
+								},
+								{
+									"key": "order[0][dir]",
+									"value": "asc",
+									"description": "Ordering direction (asc or desc)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Map Data",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/map",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"map"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generatePdf",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/generatePdf",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"generatePdf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateSinglePdf",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/generateSinglePdf/215",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"generateSinglePdf",
+								"215"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateExcel",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/generateExcel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"generateExcel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateSingleExcel",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/generateSingleExcel/216",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"generateSingleExcel",
+								"216"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country view",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/view/220",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"view",
+								"220"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Country",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "code",
+									"value": "RAS6",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Ruhul Amin Sujon",
+									"type": "text"
+								},
+								{
+									"key": "name_in_bangla",
+									"value": "রুহুল আমিন সুজন",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "name_in_arabic",
+									"value": "روح الأمين سوجون",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "draft",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "flag",
+									"type": "file",
+									"src": "/D:/Desktop/2/NID Image/CompressJPEGOnline_10kb_173306.jpg",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryFlag",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/files/images/country/flag_67bc5875748af0.18123238.jpg",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"files",
+								"images",
+								"country",
+								"flag_67bc5875748af0.18123238.jpg"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Country",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "code",
+									"value": "RAS6",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Ruhul Amin",
+									"type": "text"
+								},
+								{
+									"key": "name_in_bangla",
+									"value": "রুহুল আমিন সুজন",
+									"type": "text"
+								},
+								{
+									"key": "name_in_arabic",
+									"value": "روح الأمين سوجون",
+									"type": "text"
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "draft",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "flag",
+									"type": "file",
+									"src": "/D:/Desktop/2/NID Image/CompressJPEGOnline_10kb_173306.jpg",
+									"disabled": true
+								},
+								{
+									"key": "is_delete",
+									"value": "1",
+									"description": "1 = delete the data",
+									"type": "text"
+								},
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/update/226",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"update",
+								"226"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Bulk Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"countries\": [\r\n        {\r\n            \"id\": 215,\r\n            \"code\": \"USA\",\r\n            \"name\": \"United States\",\r\n            // \"name_in_bangla\": \"যুক্তরাষ্ট্র\",\r\n            // \"name_in_arabic\": \"الولايات المتحدة\",\r\n            // \"is_default\": 1,\r\n            // \"draft\": 0,\r\n            \"is_active\": 1\r\n        },\r\n        {\r\n            \"id\": 216,\r\n            \"code\": \"CAN\",\r\n            \"name\": \"Canada\",\r\n            // \"name_in_bangla\": \"কানাডা\",\r\n            // \"name_in_arabic\": \"كندا\",\r\n            // \"is_default\": 0,\r\n            // \"draft\": 1,\r\n            \"is_active\": 0\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/bulk-update",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"bulk-update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Import",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"countries\": [\r\n        {\r\n            \"code\": \"USA2\",\r\n            \"name\": \"United States\",\r\n            // \"name_in_bangla\": \"যুক্তরাষ্ট্র\",\r\n            // \"name_in_arabic\": \"الولايات المتحدة\",\r\n            \"is_default\": 1,\r\n            \"draft\": 0,\r\n            \"is_active\": 1\r\n        },\r\n        {\r\n            \"code\": \"CAN2\",\r\n            \"name\": \"Canada\",\r\n            // \"name_in_bangla\": \"কানাডা\",\r\n            \"name_in_arabic\": \"كندا\",\r\n            \"is_default\": 0,\r\n            \"draft\": 1,\r\n            \"is_active\": 0\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/import",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteCountry",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"sujon\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/countries/213",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries",
+								"213"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login & Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"if (responseData.success && responseData.data.token) {\r",
+									"    pm.globals.set(\"token\", responseData.data.token);\r",
+									"    console.log(\"Token saved:\", responseData.data.token);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    // \"email\": \"user@gmail.com\",\r\n    \"username\": \"sujon.egov@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"sujon@rapid.com\",\r\n    \"email\": \"sujon.egov@gmail.com\",\r\n    \"username\": \"sujon.egov@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Country Copy",
+			"item": [
+				{
+					"name": "getCountryList",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/countries/list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"list"
+							],
+							"query": [
+								{
+									"key": "draft",
+									"value": "0",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_deleted",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								},
+								{
+									"key": "is_updated",
+									"value": "1",
+									"description": "Accept 0 or 1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Check Availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/countries/check-availability?code=USA ss",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"check-availability"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "USA ss",
+									"description": "Accept string"
+								},
+								{
+									"key": "name",
+									"value": "United States ss",
+									"description": "Accept string",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/countries/history",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountrySummary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/admin/countries/summary",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"countries",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryListDatatable",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryListDatatable2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/datatable?draw=1&start=0&length=10&search[value]=RAS&columns[0][data]=id&columns[0][search][value]=&columns[1][data]=code&columns[1][search][value]=&columns[2][data]=name&columns[2][search][value]=&order[0][column]=0&order[0][dir]=asc",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"datatable"
+							],
+							"query": [
+								{
+									"key": "draw",
+									"value": "1",
+									"description": "Draw counter, typically starts at 1"
+								},
+								{
+									"key": "start",
+									"value": "0",
+									"description": "Starting point (offset) for pagination"
+								},
+								{
+									"key": "length",
+									"value": "10",
+									"description": "Number of records to display per page"
+								},
+								{
+									"key": "search[value]",
+									"value": "RAS",
+									"description": "Global search value (empty for none)"
+								},
+								{
+									"key": "columns[0][data]",
+									"value": "id",
+									"description": "Column name for the first column"
+								},
+								{
+									"key": "columns[0][search][value]",
+									"value": "",
+									"description": "Search value for the first column"
+								},
+								{
+									"key": "columns[1][data]",
+									"value": "code",
+									"description": "Column name for the second column"
+								},
+								{
+									"key": "columns[1][search][value]",
+									"value": "",
+									"description": "Search value for the second column"
+								},
+								{
+									"key": "columns[2][data]",
+									"value": "name",
+									"description": "Column name for the third column"
+								},
+								{
+									"key": "columns[2][search][value]",
+									"value": "",
+									"description": "Search value for the third column"
+								},
+								{
+									"key": "order[0][column]",
+									"value": "0",
+									"description": "Column index to order by (0 for id)"
+								},
+								{
+									"key": "order[0][dir]",
+									"value": "asc",
+									"description": "Ordering direction (asc or desc)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Map Data",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/map",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"map"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generatePdf",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/generatePdf",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"generatePdf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateSinglePdf",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/generateSinglePdf/215",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"generateSinglePdf",
+								"215"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateExcel",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/generateExcel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"generateExcel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country generateSingleExcel",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/generateSingleExcel/216",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"generateSingleExcel",
+								"216"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country view",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/view/220",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"view",
+								"220"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Country",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "code",
+									"value": "RAS6",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Ruhul Amin Sujon",
+									"type": "text"
+								},
+								{
+									"key": "name_in_bangla",
+									"value": "রুহুল আমিন সুজন",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "name_in_arabic",
+									"value": "روح الأمين سوجون",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "draft",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "flag",
+									"type": "file",
+									"src": "/D:/Desktop/2/NID Image/CompressJPEGOnline_10kb_173306.jpg",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCountryFlag",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/files/images/country/flag_67bc5875748af0.18123238.jpg",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"files",
+								"images",
+								"country",
+								"flag_67bc5875748af0.18123238.jpg"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Country",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "code",
+									"value": "RAS6",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Ruhul Amin",
+									"type": "text"
+								},
+								{
+									"key": "name_in_bangla",
+									"value": "রুহুল আমিন সুজন",
+									"type": "text"
+								},
+								{
+									"key": "name_in_arabic",
+									"value": "روح الأمين سوجون",
+									"type": "text"
+								},
+								{
+									"key": "is_default",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "draft",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "flag",
+									"type": "file",
+									"src": "/D:/Desktop/2/NID Image/CompressJPEGOnline_10kb_173306.jpg",
+									"disabled": true
+								},
+								{
+									"key": "is_delete",
+									"value": "1",
+									"description": "1 = delete the data",
+									"type": "text"
+								},
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/update/226",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"update",
+								"226"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Bulk Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"countries\": [\r\n        {\r\n            \"id\": 215,\r\n            \"code\": \"USA\",\r\n            \"name\": \"United States\",\r\n            // \"name_in_bangla\": \"যুক্তরাষ্ট্র\",\r\n            // \"name_in_arabic\": \"الولايات المتحدة\",\r\n            // \"is_default\": 1,\r\n            // \"draft\": 0,\r\n            \"is_active\": 1\r\n        },\r\n        {\r\n            \"id\": 216,\r\n            \"code\": \"CAN\",\r\n            \"name\": \"Canada\",\r\n            // \"name_in_bangla\": \"কানাডা\",\r\n            // \"name_in_arabic\": \"كندا\",\r\n            // \"is_default\": 0,\r\n            // \"draft\": 1,\r\n            \"is_active\": 0\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/bulk-update",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"bulk-update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Country Import",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"countries\": [\r\n        {\r\n            \"code\": \"USA2\",\r\n            \"name\": \"United States\",\r\n            // \"name_in_bangla\": \"যুক্তরাষ্ট্র\",\r\n            // \"name_in_arabic\": \"الولايات المتحدة\",\r\n            \"is_default\": 1,\r\n            \"draft\": 0,\r\n            \"is_active\": 1\r\n        },\r\n        {\r\n            \"code\": \"CAN2\",\r\n            \"name\": \"Canada\",\r\n            // \"name_in_bangla\": \"কানাডা\",\r\n            \"name_in_arabic\": \"كندا\",\r\n            \"is_default\": 0,\r\n            \"draft\": 1,\r\n            \"is_active\": 0\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/import",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteCountry",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"sujon\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/countries/213",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"countries",
+								"213"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login & Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();\r",
+									"\r",
+									"if (responseData.success && responseData.data.token) {\r",
+									"    pm.globals.set(\"token\", responseData.data.token);\r",
+									"    console.log(\"Token saved:\", responseData.data.token);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"sujon@rapid.com\",\r\n    \"email\": \"sujon.egov@gmail.com\",\r\n    \"username\": \"sujon.egov@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "{{token}}",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		}
+	]
+}
