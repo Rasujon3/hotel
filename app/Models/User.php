@@ -34,6 +34,7 @@ class User extends Authenticatable
         'year',
         'fbase',
         'refer_code',
+        'my_refer_code',
         'email_verified_at',
         'password',
         'token',
@@ -81,6 +82,7 @@ class User extends Authenticatable
             'year'             => 'nullable|string|max:4',
             'fbase'            => 'nullable|string|max:255',
             'refer_code'       => 'nullable|string|max:50',
+            'my_refer_code'       => 'nullable|string|max:50',
             'email_verified_at'=> 'nullable|date',
             'password'         => 'required|string|min:6',
         ];
