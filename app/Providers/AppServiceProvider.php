@@ -79,8 +79,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Load Migrations
-        if (File::exists($migrationsPath)) { // Check for migrations
-            $this->loadMigrationsFrom($migrationsPath); // Load migrations
-        }
+//        if (File::exists($migrationsPath)) { // Check for migrations
+//            $this->loadMigrationsFrom($migrationsPath); // Load migrations
+//        }
     }
 }

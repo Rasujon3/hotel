@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Log;
@@ -20,12 +21,23 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
-        'username',
+        'phone',
+        'user_type_id',
+        'role',
+        'ip_address',
+        'lat',
+        'long',
+        'day',
+        'month',
+        'year',
+        'fbase',
+        'refer_code',
+        'email_verified_at',
         'password',
-        'otp',
-        'otp_enabled',
+        'token',
+        'status',
     ];
 
     /**
@@ -53,14 +65,24 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Generate and send OTP (mock implementation).
-     */
-    public function sendOtp()
+    public static function rules()
     {
-        $otp = random_int(100000, 999999);
-        $this->update(['otp' => $otp]);
-
-        Log::info("OTP for {$this->username}: {$otp}");
+        return [
+            'full_name'        => 'nullable|string|max:255',
+            'email'            => 'required|email|max:255|unique:users,email',
+            'phone'            => 'required|string|max:20|unique:users,phone',
+            'user_type_id'     => 'nullable|string|max:50',
+            'role'             => 'nullable|string|max:50',
+            'ip_address'       => 'nullable|ip',
+            'lat'              => 'nullable|numeric',
+            'long'             => 'nullable|numeric',
+            'day'              => 'nullable|string|max:2',
+            'month'            => 'nullable|string',
+            'year'             => 'nullable|string|max:4',
+            'fbase'            => 'nullable|string|max:255',
+            'refer_code'       => 'nullable|string|max:50',
+            'email_verified_at'=> 'nullable|date',
+            'password'         => 'required|string|min:6',
+        ];
     }
 }

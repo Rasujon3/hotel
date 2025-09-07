@@ -4,6 +4,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -16,27 +17,29 @@ use Exception;
 
 class RegisterController extends AppBaseController
 {
-
-
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
         try {
-            // Validate input data
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:users,username',
-                'email' => 'required|string|email|max:255|unique:users,email',
-                'password' => 'required|string|min:8',
-            ]);
-
             DB::beginTransaction();
 
             // Create new user
             $user = User::create([
-                'name' => $validatedData['name'],
-                'username' => $validatedData['username'],
-                'email' => $validatedData['email'],
-                'password' => Hash::make($validatedData['password']),
+                'full_name'        => $request->full_name,
+                'email'            => $request->email,
+                'phone'            => $request->phone,
+                'user_type_id'     => $request->user_type_id,
+                'role'             => $request->role,
+                'ip_address'       => $request->ip_address,
+                'lat'              => $request->lat,
+                'long'             => $request->long,
+                'day'              => $request->day,
+                'month'            => $request->month,
+                'year'             => $request->year,
+                'fbase'            => $request->fbase ?? '',
+                'refer_code'       => $request->refer_code,
+                'password'         => Hash::make($request->password),
+                'token'            => $request->token ?? \Str::random(60),
+                'status'           => 'Active',
             ]);
 
             // Generate API token
@@ -48,23 +51,21 @@ class RegisterController extends AppBaseController
                 'user' => $user,
                 'token' => $token,
             ], 'User created successfully.');
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $e->errors(),
-            ], 422);
+
         } catch (Exception $e) {
             DB::rollBack();
 
-            // Log error
-            Log::error('Error registering user: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
+            // Log the error
+            Log::error('Error in updating Register: ', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while registering the user.',
+                'message' => 'Something went wrong!!!',
             ], 500);
         }
     }
