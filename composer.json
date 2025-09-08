@@ -18,6 +18,7 @@
         "mpdf/mpdf": "^8.2",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.12",
+        "stevebauman/location": "^7.6",
         "yajra/laravel-datatables": "11.0"
     },
     "require-dev": {

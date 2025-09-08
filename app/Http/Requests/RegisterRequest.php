@@ -40,6 +40,6 @@ class RegisterRequest extends FormRequest
 
         return Country::rules($countryId);
         */
-        return User::rules();
+        return User::rules($this);
     }
 }

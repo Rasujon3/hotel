@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Exception;
+use Stevebauman\Location\Facades\Location;
 
 class RegisterController extends AppBaseController
 {
@@ -30,18 +32,11 @@ class RegisterController extends AppBaseController
             $long = $request->long ?? '';
 
             if (empty($lat) && empty($long)) {
-                try {
-                    $response = @file_get_contents("http://ip-api.com/json/{$ipAddress}");
-                    $data = $response ? json_decode($response, true) : null;
+                $position = Location::get($ipAddress);
 
-                    if ($data && $data['status'] === 'success') {
-                        $lat = $data['lat'];
-                        $long = $data['lon'];
-                    }
-                } catch (\Exception $e) {
-                    // fallback if API fails
-                    $lat = '';
-                    $long = '';
+                if ($position) {
+                    $lat = $position->latitude;
+                    $long = $position->longitude;
                 }
             }
 
@@ -65,10 +60,25 @@ class RegisterController extends AppBaseController
                 'month'            => $month,
                 'year'             => $year,
                 'fbase'            => $request->fbase ?? '',
+                'refer_code'       => $request->refer_code ?? '',
                 'my_refer_code'    => $myReferCode,
                 'password'         => Hash::make($request->password),
-                # 'status'           => 'Active',
+                'status'           => ($request->user_type_id === '2' && $request->role === 'user')
+                                        ? 'Active'
+                                        : 'Inactive',
             ]);
+
+            // ✅ If owner, also create hotel record
+            if ($request->user_type_id == 3 && $request->role === 'owner') {
+                Hotel::create([
+                    'user_id'          => $user->id,
+                    'hotel_name'       => $request->hotel_name,
+                    'hotel_description'=> $request->hotel_description,
+                    'hotel_address'    => $request->hotel_address,
+                    'lat'              => $lat,
+                    'long'             => $long,
+                ]);
+            }
 
             // Generate API token
             $token = $user->createToken('API Token')->plainTextToken;
@@ -76,8 +86,8 @@ class RegisterController extends AppBaseController
             DB::commit();
 
             return $this->sendResponse([
-                'user' => $user,
                 'token' => $token,
+                'user' => $user,
             ], 'User created successfully.');
 
         } catch (Exception $e) {
@@ -100,8 +110,7 @@ class RegisterController extends AppBaseController
     private function generateUniqueReferCode()
     {
         do {
-            // generate 6 letters + 3 digits
-            $letters = Str::lower(Str::random(3)); // random 6 letters
+            $letters = Str::upper(Str::random(3)); // random 3 letters
             $numbers = random_int(100, 999);             // random 3 digit number
             $code = $letters . $numbers;
 

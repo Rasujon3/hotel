@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Validation\Rule;
@@ -66,25 +68,45 @@ class User extends Authenticatable
         ];
     }
 
-    public static function rules()
+    // In User model
+    public static function rules($request = null)
     {
-        return [
-            'full_name'        => 'nullable|string|max:255',
-            'email'            => 'required|email|max:255|unique:users,email',
-            'phone'            => 'required|string|max:20|unique:users,phone',
-            'user_type_id'     => 'nullable|string|max:50',
-            'role'             => 'nullable|string|max:50',
-            'ip_address'       => 'nullable|ip',
-            'lat'              => 'nullable|numeric',
-            'long'             => 'nullable|numeric',
-            'day'              => 'nullable|string|max:2',
-            'month'            => 'nullable|string',
-            'year'             => 'nullable|string|max:4',
-            'fbase'            => 'nullable|string|max:255',
-            'refer_code'       => 'nullable|string|max:50',
-            'my_refer_code'       => 'nullable|string|max:50',
-            'email_verified_at'=> 'nullable|date',
-            'password'         => 'required|string|min:6',
+        $rules = [
+            'full_name' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'required|string|max:20|unique:users,phone',
+            'user_type_id' => 'required|in:2,3',
+            'role' => 'required|string|in:user,owner',
+            'ip_address' => 'nullable|ip',
+            'lat' => 'nullable|numeric',
+            'long' => 'nullable|numeric',
+            'day' => 'nullable|string|max:2',
+            'month' => 'nullable|string',
+            'year' => 'nullable|string|max:4',
+            'fbase' => 'nullable|string|max:255',
+            'refer_code' => 'nullable|string|max:50|exists:users,my_refer_code',
+            'my_refer_code' => 'nullable|string|max:50',
+            'email_verified_at' => 'nullable|date',
+            'password' => 'required|string|min:6',
         ];
+
+        // If request is passed, check for owner-specific rules
+        if ($request && $request->user_type_id == 3 && $request->role === 'owner') {
+            $rules = array_merge($rules, [
+                'hotel_name' => 'required|string|max:255',
+                'hotel_description' => 'required|string',
+                'hotel_address' => 'required|string|max:255',
+                'lat' => 'required|numeric',
+                'long' => 'required|numeric',
+            ]);
+        }
+
+        return $rules;
     }
+
+    public function hotels(): HasMany
+    {
+        return $this->hasMany(Hotel::class);
+    }
+
 }
