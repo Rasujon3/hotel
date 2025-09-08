@@ -21,7 +21,7 @@ class LoginController extends AppBaseController
         try {
             // Validate request
             $request->validate([
-                'username' => 'required|string',
+                'login' => 'required|string',
                 'password' => 'required|string',
             ]);
 
@@ -36,8 +36,11 @@ class LoginController extends AppBaseController
 
             DB::beginTransaction();
 
-            // Find user by username or email
-            $user = User::where('username', $request->username)->first();
+            // Find user by phone or email
+            $user = User::where('email', $request->login)
+                ->orWhere('phone', $request->login)
+                ->where('status', "Active")
+                ->first();
 
             // Validate user and password
             if (!$user || !Hash::check($request->password, $user->password)) {
@@ -47,26 +50,6 @@ class LoginController extends AppBaseController
 
             // Reset login attempts after successful login
             RateLimiter::clear($key);
-
-            // If OTP is enabled, send OTP
-            if ($user->otp_enabled) {
-                try {
-                    $user->sendOtp();
-                } catch (Exception $e) {
-                    DB::rollBack();
-                    Log::error('Error sending OTP: ' . $e->getMessage(), [
-                        'user_id' => $user->id,
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to send OTP. Please try again.',
-                    ], 500);
-                }
-
-                DB::commit();
-                return $this->sendSuccess('OTP sent to your phone number. Please verify.');
-            }
 
             // Generate API token immediately if OTP is not enabled
             $token = $user->createToken('API Token')->plainTextToken;
@@ -88,12 +71,10 @@ class LoginController extends AppBaseController
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while logging in. Please try again later.',
+                'message' => 'Something went wrong!!!',
             ], 500);
         }
     }
-
-
     public function verifyOtp(Request $request)
     {
         try {
@@ -149,7 +130,6 @@ class LoginController extends AppBaseController
             ], 500);
         }
     }
-
     public function logout(Request $request)
     {
         try {
