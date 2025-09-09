@@ -77,6 +77,7 @@ class RegisterController extends AppBaseController
                     'hotel_address'    => $request->hotel_address,
                     'lat'              => $lat,
                     'long'             => $long,
+                    'status'           => 'Inactive',
                 ]);
             }
 

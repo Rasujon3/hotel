@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('hotels', function (Blueprint $table) {
             $table->string('package_end_date')->nullable()->after('long');
             $table->string('package_start_date')->nullable()->after('long');
-            $table->string('status')->default('Inactive')->nullable()->after('long');
+            $table->enum('status', ['Active', 'Inactive'])->default('Inactive')->nullable()->after('long');
             $table->string('package_id')->nullable()->after('long');
         });
     }

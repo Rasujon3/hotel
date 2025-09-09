@@ -28,11 +28,14 @@ class ResponseUtil
         $res = [
             'success' => false,
             'message' => $message,
+            'data' => $data,
         ];
 
+        /*
         if (! empty($data)) {
             $res['data'] = $data;
         }
+        */
 
         return $res;
     }

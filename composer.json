@@ -38,7 +38,8 @@
             "Modules\\": "modules/"
         },
         "files": [
-            "app/Helpers/ActivityLogger.php"
+            "app/Helpers/ActivityLogger.php",
+            "app/Helpers/helpers.php"
         ]
     },
     "autoload-dev": {
