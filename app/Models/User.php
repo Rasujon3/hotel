@@ -104,6 +104,15 @@ class User extends Authenticatable
 
         return $rules;
     }
+    public static function statusUpdateRules()
+    {
+        $rules = [
+            'user_id' => 'required|exists:users,id',
+            'package_id' => 'required|exists:packages,id',
+        ];
+
+        return $rules;
+    }
 
     public function hotels(): HasMany
     {

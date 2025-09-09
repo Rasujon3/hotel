@@ -56,7 +56,10 @@ class LoginController extends AppBaseController
 
             DB::commit();
 
-            return $this->sendResponse(['token' => $token], 'Login successful.');
+            return $this->sendResponse([
+                'token' => $token,
+                'user' => $user,
+            ], 'Login successful.');
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
