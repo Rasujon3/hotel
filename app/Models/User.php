@@ -88,6 +88,7 @@ class User extends Authenticatable
             'my_refer_code' => 'nullable|string|max:50',
             'email_verified_at' => 'nullable|date',
             'password' => 'required|string|min:6',
+            'confirm_password' => 'required|string|min:6|same:password',
         ];
 
         // If request is passed, check for owner-specific rules
