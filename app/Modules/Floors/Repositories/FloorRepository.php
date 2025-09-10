@@ -71,7 +71,7 @@ class FloorRepository
         DB::beginTransaction();
         try {
             // Perform soft delete
-            $deleted = $floor->delete();
+            $deleted = $floor->rooms()->delete();
 
             if (!$deleted) {
                 DB::rollBack();
