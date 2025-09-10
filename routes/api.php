@@ -34,3 +34,11 @@ Route::get('/db-seed', function(){
     ]);
     return response()->json(['message' => 'Database seeded successfully.']);
 });
+
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+
+    return 'All caches (config, route, application) have been cleared!';
+});
