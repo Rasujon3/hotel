@@ -16,6 +16,14 @@ class FloorController extends AppBaseController
         $this->floorRepository = $floorRepo;
     }
 
+    public function myHotelList()
+    {
+        $userId = getUser()?->id;
+
+        $data = $this->floorRepository->myHotelList($userId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+
     // Fetch all data
     public function index(FloorRequest $request)
     {

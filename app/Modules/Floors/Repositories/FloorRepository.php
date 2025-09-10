@@ -2,12 +2,8 @@
 
 namespace App\Modules\Floors\Repositories;
 
-use App\Helpers\ActivityLogger;
-use App\Modules\Areas\Models\Area;
-use App\Modules\Areas\Models\AreaHistory;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -18,7 +14,6 @@ class FloorRepository
     {
         $data = Floor::where('hotel_id', $hotelId)
             ->where('user_id', $userId)
-            ->where('status', 'Active')
             ->get();
 
         return $data;
@@ -129,5 +124,10 @@ class FloorRepository
             ->where('id', '!=', $id)
             ->exists();
         return $checkNameExist;
+    }
+
+    public function myHotelList($userId){
+        $data = Hotel::where('user_id',$userId)->get();
+        return $data;
     }
 }
