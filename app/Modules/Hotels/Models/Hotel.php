@@ -4,6 +4,7 @@ namespace App\Modules\Hotels\Models;
 
 use App\Models\User;
 use App\Modules\Floors\Models\Floor;
+use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,9 +34,12 @@ class Hotel extends Model
     {
         return $this->belongsTo(User::class,'user_id');
     }
-
     public function floor(): HasMany
     {
         return $this->hasMany(Floor::class);
+    }
+    public function rooms(): HasMany
+    {
+        return $this->hasMany(Room::class);
     }
 }

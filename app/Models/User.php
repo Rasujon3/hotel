@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -122,6 +123,10 @@ class User extends Authenticatable
     public function floors(): HasMany
     {
         return $this->hasMany(Floor::class);
+    }
+    public function rooms(): HasMany
+    {
+        return $this->hasMany(Room::class);
     }
 
 }

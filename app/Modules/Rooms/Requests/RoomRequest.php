@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Modules\Areas\Requests;
+namespace App\Modules\Rooms\Requests;
 
 use App\Modules\Areas\Models\Area;
+use App\Modules\Packages\Models\Package;
+use App\Modules\Rooms\Models\Room;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AreaRequest extends FormRequest
+class RoomRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,6 +30,7 @@ class AreaRequest extends FormRequest
         // Get the route name and apply null-safe operator
         $routeName = $this->route()?->getName();
 
+        /*
         if ($routeName === 'areas.import') {
             return Area::importRules();
         }
@@ -43,6 +46,13 @@ class AreaRequest extends FormRequest
             return Area::checkAvailabilityRules();
         }
         $areaId = $this->route('area') ?: null;
-        return Area::rules($areaId);
+        */
+
+        if ($routeName === 'rooms.list') {
+            return Room::listRules();
+        }
+
+        $id = $this->route('room') ?: null;
+        return Room::rules($id);
     }
 }

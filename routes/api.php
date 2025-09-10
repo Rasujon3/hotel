@@ -20,3 +20,17 @@ Route::prefix('/v1')->middleware('api')->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']); // Reset via OTP
     Route::post('/password/reset', [ForgotPasswordController::class, 'resetPasswordWithToken']); // Reset via email token
 });
+
+Route::get('/migrate', function(){
+    Artisan::call('migrate', [
+        '--force' => true,
+    ]);
+    return response()->json(['message' => 'Migrations run successfully.']);
+});
+
+Route::get('/db-seed', function(){
+    Artisan::call('db:seed', [
+        '--force' => true,
+    ]);
+    return response()->json(['message' => 'Database seeded successfully.']);
+});
