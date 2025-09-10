@@ -43,6 +43,8 @@ class User extends Authenticatable
         'password',
         'token',
         'status',
+        'image_url',
+        'image_path',
     ];
 
     /**
@@ -91,6 +93,7 @@ class User extends Authenticatable
             'email_verified_at' => 'nullable|date',
             'password' => 'required|string|min:6',
             'confirm_password' => 'required|string|min:6|same:password',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ];
 
         // If request is passed, check for owner-specific rules

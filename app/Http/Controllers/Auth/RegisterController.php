@@ -7,11 +7,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use App\Modules\Hotels\Models\Hotel;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Services\S3Service;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +19,7 @@ use Stevebauman\Location\Facades\Location;
 
 class RegisterController extends AppBaseController
 {
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request, S3Service $s3)
     {
         DB::beginTransaction();
         try {
@@ -46,6 +44,19 @@ class RegisterController extends AppBaseController
             $month = $now->format('M');
             $year  = $now->format('Y');
 
+            $image_url = '';
+            $image_path = '';
+            if($request->hasFile('image')) {
+                $file = $request->file('image');
+                $result = $s3->upload($file, 'profile');
+
+                if ($result) {
+                    $image_url = $result['url'];
+                    $image_path = $result['path'];
+                }
+            }
+
+
             // Create new user
             $user = User::create([
                 'full_name'        => $request->full_name,
@@ -61,6 +72,8 @@ class RegisterController extends AppBaseController
                 'year'             => $year,
                 'fbase'            => $request->fbase ?? '',
                 'refer_code'       => $request->refer_code ?? '',
+                'image_url'        => $image_url,
+                'image_path'       => $image_path,
                 'my_refer_code'    => $myReferCode,
                 'password'         => Hash::make($request->password),
                 'status'           => ($request->user_type_id === '2' && $request->role === 'user')

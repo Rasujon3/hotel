@@ -47,15 +47,15 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
+            'key' => env('AWS_ACCESS_KEY_ID', "AKIA6JKEYAGD5ZJ2PBIX"),
+            'secret' => env('AWS_SECRET_ACCESS_KEY', "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"),
+            'region' => env('AWS_DEFAULT_REGION', "ap-south-1"),
+            'bucket' => env('AWS_BUCKET', "aisoft-hotel-project"),
+            'url' => env('AWS_URL', "https://aisoft-hotel-project.s3.ap-south-1.amazonaws.com/"),
+            'endpoint' => env('AWS_ENDPOINT'), // optional for custom endpoints
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
         ],
+
 
     ],
 
