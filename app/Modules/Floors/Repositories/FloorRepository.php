@@ -3,7 +3,9 @@
 namespace App\Modules\Floors\Repositories;
 
 use App\Modules\Floors\Models\Floor;
+use App\Modules\Floors\Models\FloorImg;
 use App\Modules\Hotels\Models\Hotel;
+use App\Services\S3Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -12,7 +14,8 @@ class FloorRepository
 {
     public function all($userId, $hotelId)
     {
-        $data = Floor::where('hotel_id', $hotelId)
+        $data = Floor::with('images')
+            ->where('hotel_id', $hotelId)
             ->where('user_id', $userId)
             ->get();
 
@@ -23,8 +26,33 @@ class FloorRepository
         DB::beginTransaction();
         try {
             $data['user_id'] = $userId;
+            $hotelId = $data['hotel_id'];
             // Create the record in the database
             $created = Floor::create($data);
+
+            $s3 = app(S3Service::class);
+
+            if (!empty($data['images'])) {
+                foreach ($data['images'] as $file) {
+                    $image_url = null;
+                    $image_path = null;
+
+                    $result = $s3->upload($file, 'floor');
+
+                    if ($result) {
+                        $image_url = $result['url'];
+                        $image_path = $result['path'];
+                    }
+
+                    FloorImg::create([
+                        'user_id' => $userId,
+                        'hotel_id' => $hotelId,
+                        'floor_id' => $created->id,
+                        'image_url'  => $image_url,
+                        'image_path' => $image_path,
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -43,12 +71,49 @@ class FloorRepository
             return null;
         }
     }
-    public function update(Floor $floor, array $data)
+    public function update(Floor $floor, array $data, $userId)
     {
         DB::beginTransaction();
         try {
             // Perform the update
             $floor->update($data);
+
+            if (!empty($data['images'])) {
+                $s3 = app(S3Service::class);
+
+                $oldImages = FloorImg::where('floor_id', $floor->id)->get();
+                if (count($oldImages) > 0) {
+                    foreach ($oldImages as $img) {
+                        if ($img->image_path) {
+                            $s3->delete($img->image_path);
+                        }
+                        $img->delete();
+                    }
+                }
+
+                $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
+                if (!empty($data['images'])) {
+                    foreach ($data['images'] as $file) {
+                        $image_url = null;
+                        $image_path = null;
+
+                        $result = $s3->upload($file, 'floor');
+
+                        if ($result) {
+                            $image_url = $result['url'];
+                            $image_path = $result['path'];
+                        }
+
+                        FloorImg::create([
+                            'user_id'   => $userId,
+                            'hotel_id'  => $hotelId,
+                            'floor_id'  => $floor->id,
+                            'image_url'   => $image_url,
+                            'image_path'  => $image_path,
+                        ]);
+                    }
+                }
+            }
 
             DB::commit();
             return $floor;
@@ -66,17 +131,32 @@ class FloorRepository
             return null;
         }
     }
+    // In FloorRepository.php
     public function delete(Floor $floor)
     {
         DB::beginTransaction();
         try {
-            // Perform soft delete
-            $deleted = $floor->rooms()->delete();
+            // 1. Delete related rooms first
+            $floor->rooms()->delete();
 
-            if (!$deleted) {
-                DB::rollBack();
-                return false;
+            // 2. Get all floor images
+            $oldImages = $floor->images; // Use the relationship property to get the collection
+
+            // 3. Delete images from S3
+            if ($oldImages->isNotEmpty()) {
+                $s3 = app(S3Service::class);
+                foreach ($oldImages as $img) {
+                    if ($img->image_path) {
+                        $s3->delete($img->image_path);
+                    }
+                }
             }
+
+            // 4. Delete the image records from the database
+            $floor->images()->delete();
+
+            // 5. Finally, delete the floor itself
+            $floor->delete();
 
             DB::commit();
             return true;
@@ -84,7 +164,6 @@ class FloorRepository
         } catch (Exception $e) {
             DB::rollBack();
 
-            // Log error
             Log::error('Error deleting data: ' , [
                 'id' => $floor->id,
                 'message' => $e->getMessage(),
@@ -98,7 +177,9 @@ class FloorRepository
     }
     public function find($id, $userId)
     {
-        return Floor::where('user_id', $userId)->find($id);
+        return Floor::with('images')
+            ->where('user_id', $userId)
+            ->find($id);
     }
     public function checkValid($userId, $hotelId)
     {

@@ -2,32 +2,31 @@
 
 namespace App\Modules\Hotels\Controllers;
 
-use App\Modules\Areas\Queries\AreaDatatable;
-use App\Modules\Areas\Repositories\AreaRepository;
-use App\Modules\Areas\Requests\AreaRequest;
 use App\Http\Controllers\AppBaseController;
+use App\Modules\Hotels\Repositories\HotelRepository;
+use App\Modules\Hotels\Requests\HotelRequest;
 
 class HotelController extends AppBaseController
 {
-    protected AreaRepository $areaRepository;
-    protected AreaDatatable $areaDatatable;
+    protected HotelRepository $hotelRepository;
 
-    public function __construct(AreaRepository $areaRepo, AreaDatatable $areaDatatable)
+    public function __construct(HotelRepository $hotelRepo)
     {
-        $this->areaRepository = $areaRepo;
-        $this->areaDatatable = $areaDatatable;
+        $this->hotelRepository = $hotelRepo;
     }
     // Fetch all data
-    public function index(AreaRequest $request)
+    public function index()
     {
-        $data = $this->areaRepository->all($request);
-        return $this->sendResponse($data, 'Areas retrieved successfully.');
+        $userId = getUser()?->id;
+
+        $data = $this->hotelRepository->all($userId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
     // Store data
-    public function store(AreaRequest $request)
+    public function store(HotelRequest $request)
     {
-        $area = $this->areaRepository->store($request->all());
+        $area = $this->hotelRepository->store($request->all());
         if (!$area) {
             return $this->sendError('Something went wrong!!! [AS-01]', 500);
         }
@@ -37,39 +36,39 @@ class HotelController extends AppBaseController
     // Get single details data
     public function show($area)
     {
-        $data = $this->areaRepository->find($area);
+        $data = $this->hotelRepository->find($area);
         if (!$data) {
             return $this->sendError('Area not found');
         }
-        $summary = $this->areaRepository->getData($area);
+        $summary = $this->hotelRepository->getData($area);
         return $this->sendResponse($summary, 'Area retrieved successfully.');
     }
     // Update data
-    public function update(AreaRequest $request, $area)
+    public function update(HotelRequest $request, $area)
     {
-        $data = $this->areaRepository->find($area);
+        $data = $this->hotelRepository->find($area);
         if (!$data) {
             return $this->sendError('Area not found');
         }
-        $updated = $this->areaRepository->update($data, $request->all());
+        $updated = $this->hotelRepository->update($data, $request->all());
         if (!$updated) {
             return $this->sendError('Something went wrong!!! [AU-04]', 500);
         }
         return $this->sendResponse($area, 'Area updated successfully!');
     }
     // bulk update
-    public function bulkUpdate(AreaRequest $request)
+    public function bulkUpdate(HotelRequest $request)
     {
-        $bulkUpdate = $this->areaRepository->bulkUpdate($request);
+        $bulkUpdate = $this->hotelRepository->bulkUpdate($request);
         if (!$bulkUpdate) {
             return $this->sendError('Something went wrong!!! [ABU-05]', 500);
         }
         return $this->sendResponse([],'Area Bulk updated successfully!');
     }
     // check availability
-    public function checkAvailability(AreaRequest $request)
+    public function checkAvailability(HotelRequest $request)
     {
-        $checkAvailability = $this->areaRepository->checkAvailability($request->all());
+        $checkAvailability = $this->hotelRepository->checkAvailability($request->all());
         if ($checkAvailability) {
             return $this->sendError('Area is already exist!', 500);
         }
@@ -78,12 +77,12 @@ class HotelController extends AppBaseController
     // history
     public function history()
     {
-        $history = $this->areaRepository->history();
+        $history = $this->hotelRepository->history();
         return $this->sendResponse($history,'Area history retrieved successfully.');
     }
-    public function import(AreaRequest $request)
+    public function import(HotelRequest $request)
     {
-        $import = $this->areaRepository->import($request);
+        $import = $this->hotelRepository->import($request);
         if (!$import) {
             return $this->sendError('Something went wrong!!! [CCBU-06]', 500);
         }

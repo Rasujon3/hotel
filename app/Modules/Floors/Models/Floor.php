@@ -31,6 +31,8 @@ class Floor extends Model
             'name' => ['required', 'string', 'max:45'],
             'hotel_id' => 'required|string|max:191|exists:hotels,id',
             'status' => 'required|in:Active,Inactive',
+            'images' => 'required|array|min:1',
+            'images.*' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
     public static function listRules()
@@ -39,12 +41,20 @@ class Floor extends Model
             'hotel_id' => 'required|string|max:191|exists:hotels,id',
         ];
     }
-
+    public static function updateRules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:45'],
+            'hotel_id' => 'required|string|max:191|exists:hotels,id',
+            'status' => 'required|in:Active,Inactive',
+            'images' => 'nullable|array|min:1',
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ];
+    }
     public function user() : belongsTo
     {
         return $this->belongsTo(User::class,'user_id');
     }
-
     public function hotel() : belongsTo
     {
         return $this->belongsTo(Hotel::class,'hotel_id');
@@ -52,5 +62,9 @@ class Floor extends Model
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class);
+    }
+    public function images(): HasMany
+    {
+        return $this->hasMany(FloorImg::class);
     }
 }

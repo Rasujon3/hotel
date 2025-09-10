@@ -2,9 +2,8 @@
 
 namespace App\Modules\Hotels\Repositories;
 
-use App\Helpers\ActivityLogger;
-use App\Modules\Areas\Models\Area;
-use App\Modules\Areas\Models\AreaHistory;
+
+use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,30 +11,10 @@ use Exception;
 
 class HotelRepository
 {
-    public function all($request)
+    public function all($userId)
     {
-        $list = $this->list($request);
-
-        $areas = Area::withTrashed()->get(); // Load all records including soft-deleted
-
-        $totalDraft = $areas->whereNull('deleted_at')->where('draft', true)->count();
-        $totalInactive = $areas->whereNull('deleted_at')->where('is_active', false)->count();
-        $totalActive = $areas->whereNull('deleted_at')->where('is_active', true)->count();
-        $totalDeleted = $areas->whereNotNull('deleted_at')->count();
-        $totalUpdated = $areas->whereNull('deleted_at')->whereNotNull('updated_at')->count();
-
-        // Ensure total count is without soft-deleted
-        $totalAreas = $areas->count();
-
-        return [
-            'totalAreas' => $totalAreas,
-            'totalDraft' => $totalDraft,
-            'totalInactive' => $totalInactive,
-            'totalActive' => $totalActive,
-            'totalUpdated' => $totalUpdated,
-            'totalDeleted' => $totalDeleted,
-            'list' => $list,
-        ];
+        $data = Hotel::where('user_id',$userId)->get();
+        return $data;
     }
     public function list($request)
     {
@@ -85,7 +64,7 @@ class HotelRepository
         $list = $query->get();
         return $list;
     }
-    public function store(array $data): ?Area
+    public function store(array $data)
     {
         DB::beginTransaction();
         try {
@@ -124,7 +103,7 @@ class HotelRepository
         }
     }
 
-    public function update(Area $area, array $data): ?Area
+    public function update(Area $area, array $data)
     {
         DB::beginTransaction();
         try {

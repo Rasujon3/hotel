@@ -94,7 +94,7 @@ class FloorController extends AppBaseController
             return $this->sendError('Floor name already exist.', 404);
         }
 
-        $updated = $this->floorRepository->update($data, $request->all());
+        $updated = $this->floorRepository->update($data, $request->all(), $userId);
         if (!$updated) {
             return $this->sendError('Something went wrong!!! [FC-02]', 500);
         }

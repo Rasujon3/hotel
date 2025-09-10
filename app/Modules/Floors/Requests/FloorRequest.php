@@ -48,6 +48,10 @@ class FloorRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
+        if ($routeName === 'floors.update') {
+            return Floor::updateRules();
+        }
+
         if ($routeName === 'floors.list') {
             return Floor::listRules();
         }
