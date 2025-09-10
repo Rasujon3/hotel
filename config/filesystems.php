@@ -47,8 +47,8 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID', "AKIA6JKEYAGD5ZJ2PBIX"),
-            'secret' => env('AWS_SECRET_ACCESS_KEY', "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"),
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION', "ap-south-1"),
             'bucket' => env('AWS_BUCKET', "aisoft-hotel-project"),
             'url' => env('AWS_URL', "https://aisoft-hotel-project.s3.ap-south-1.amazonaws.com/"),
