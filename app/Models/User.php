@@ -56,6 +56,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'otp',
+        'image_path',
     ];
 
     /**
