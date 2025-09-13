@@ -8,6 +8,7 @@ use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
 use App\Modules\Rooms\Models\Room;
 use App\Services\S3Service;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -55,11 +56,16 @@ class HotelRepository
             $user->update();
 
             $previousPercentage = $hotel->booking_percentage;
+            $checkIn  = $data['check_in_time'] ? Carbon::parse($data['check_in_time'])->format('H:i:s') : $hotel->check_in_time;
+            $checkOut = $data['check_out_time'] ? Carbon::parse($data['check_out_time'])->format('H:i:s') : $hotel->check_out_time;
+
             // Perform the update
             $hotel->hotel_name = $data['hotel_name'] ?? $hotel->hotel_name;
             $hotel->hotel_address = $data['hotel_address'] ?? $hotel->hotel_address;
             $hotel->hotel_description = $data['hotel_description'] ?? $hotel->hotel_description;
             $hotel->booking_percentage = $data['booking_percentage'] ?? $hotel->booking_percentage;
+            $hotel->check_in_time = $checkIn;
+            $hotel->check_out_time = $checkOut;
             $hotel->update();
 
             if (

@@ -27,6 +27,8 @@ class Hotel extends Model
         'long',
         'status',
         'booking_percentage',
+        'check_in_time',
+        'check_out_time',
         'package_id',
         'package_start_date',
         'package_end_date',
