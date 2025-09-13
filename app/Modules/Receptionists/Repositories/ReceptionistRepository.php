@@ -82,7 +82,7 @@ class ReceptionistRepository
         try {
             $hotelId = $request->hotel_id;
             // Create the record in the database
-            $user = $this->userRegistration($request);
+            $user = $this->userRegistration($request, $hotelId);
 
             $receptionist = Receptionist::create([
                 'user_id'    => $user->id,
@@ -114,7 +114,7 @@ class ReceptionistRepository
             return null;
         }
     }
-    private function userRegistration($request)
+    private function userRegistration($request, $hotelId)
     {
         $myReferCode = $this->generateUniqueReferCode();
         $ipAddress = $request->ip();
@@ -169,7 +169,8 @@ class ReceptionistRepository
             'image_path'       => $image_path,
             'my_refer_code'    => $myReferCode,
             'password'         => Hash::make($request->password),
-            'status'           => 'Active'
+            'status'           => 'Active',
+            'hotel_id'         => $hotelId
         ]);
 
         return $user;

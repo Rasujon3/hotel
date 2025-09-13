@@ -43,6 +43,7 @@ class User extends Authenticatable
         'password',
         'token',
         'status',
+        'hotel_id',
         'image_url',
         'image_path',
     ];
@@ -115,6 +116,7 @@ class User extends Authenticatable
         $rules = [
             'user_id' => 'required|exists:users,id',
             'package_id' => 'required|exists:packages,id',
+            'hotel_id' => 'required|exists:hotels,id',
         ];
 
         return $rules;

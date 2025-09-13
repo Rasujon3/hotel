@@ -26,15 +26,16 @@ class AdminController extends AppBaseController
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
-    // Store data
+    // Update status data
     public function ownerStatusUpdate(AdminRequest $request)
     {
-        $checkExist = $this->adminRepository->checkExist($request->user_id);
+        $hotelId = $request->hotel_id;
+        $checkExist = $this->adminRepository->checkExist($request->user_id, $hotelId);
         if (!$checkExist) {
-            return $this->sendError('User not Found.', 500);
+            return $this->sendError('User or Hotel not Found.', 500);
         }
 
-        $update = $this->adminRepository->updateStatus($request->user_id, $request->package_id);
+        $update = $this->adminRepository->updateStatus($request->user_id, $request->package_id, $hotelId);
         if (!$update) {
             return $this->sendError('Something went wrong!!! [AC-01]', 500);
         }

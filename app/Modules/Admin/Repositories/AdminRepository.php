@@ -17,7 +17,8 @@ class AdminRepository
 {
     public function all()
     {
-        $data = User::where('user_type_id', 3)
+        $data = User::with('hotels')
+            ->where('user_type_id', 3)
             ->where('role', 'owner')
             ->get();
 
@@ -105,26 +106,30 @@ class AdminRepository
     {
         return Package::find($id);
     }
-    public function checkExist($id)
+    public function checkExist($id, $hotelId)
     {
-        return User::where('id', $id)
+        $user = User::where('id', $id)
             ->where('user_type_id', 3)
             ->where('role', 'owner')
             ->where('status', 'Inactive')
             ->exists();
+
+        $hotel = Hotel::where('id', $hotelId)->exists();
+        return $user && $hotel;
     }
 
-    public function updateStatus($user_id, $package_id)
+    public function updateStatus($user_id, $package_id, $hotelId)
     {
         DB::beginTransaction();
         try {
             $user = User::where('id', $user_id)->first();
+            $hotel = Hotel::where('id', $hotelId)->first();
 
             $user->status = 'Active';
+            $user->hotel_id = $hotel->id;
             $user->update();
 
             $package = Package::where('id', $package_id)->first();
-            $hotel = Hotel::where('user_id', $user->id)->first();
 
             if ($hotel && $package) {
                 $startDate = now();
@@ -146,7 +151,7 @@ class AdminRepository
             }
 
             $hotel->status = 'Active';
-            $hotel->package_id = $package->id;
+            $hotel->package_id = $package?->id;
             $hotel->package_start_date = $startDate;
             $hotel->package_end_date = $endDate;
             $hotel->update();

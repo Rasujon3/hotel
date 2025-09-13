@@ -48,7 +48,7 @@ class AdminRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
-        $id = $this->route('package') ?: null;
+        $id = $this->route('admin') ?: null;
         return User::statusUpdateRules();
     }
 }
