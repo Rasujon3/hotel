@@ -3,6 +3,7 @@
 namespace App\Modules\Rooms\Repositories;
 
 use App\Modules\Floors\Models\Floor;
+use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -105,10 +106,11 @@ class RoomRepository
     {
         return Room::with('hotel', 'floor')->find($id);
     }
-    public function checkExist($userId, $hotelId)
+    public function checkExist($userId, $hotelId, $floorId)
     {
         $checkValid = Floor::where('user_id', $userId)
             ->where('hotel_id', $hotelId)
+            ->where('id', $floorId)
             ->where('status', 'Active')
             ->exists();
         return $checkValid;
@@ -137,5 +139,12 @@ class RoomRepository
         $value = ($price * $bookingPrice) / 100;
         return ceil($value);
     }
+    public function checkBookingPercentage($userId, $hotelId)
+    {
+        $checkBookingPercentage = Hotel::where('user_id', $userId)
+            ->where('id', $hotelId)
+            ->value('booking_percentage');
 
+        return $checkBookingPercentage;
+    }
 }

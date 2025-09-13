@@ -3,8 +3,11 @@
 namespace App\Modules\Hotels\Repositories;
 
 
+use App\Models\User;
 use App\Modules\Hotels\Models\Hotel;
-use Illuminate\Support\Facades\Auth;
+use App\Modules\Hotels\Models\HotelImg;
+use App\Modules\Rooms\Models\Room;
+use App\Services\S3Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -13,86 +16,26 @@ class HotelRepository
 {
     public function all($userId)
     {
-        $data = Hotel::where('user_id',$userId)->get();
+        $data = Hotel::with('images', 'package')->where('user_id',$userId)->get();
         return $data;
     }
-    public function list($request)
-    {
-        $query = Area::withTrashed()
-            ->leftJoin('countries', 'countries.id', '=', 'areas.country_id')
-            ->leftJoin('states', 'states.id', '=', 'areas.state_id')
-            ->leftJoin('cities', 'cities.id', '=', 'areas.city_id')
-            ->select(
-                'areas.*',
-                'countries.name as country_name',
-                'states.name as state_name',
-                'cities.name as city_name'
-            );
-        if ($request->has('draft')) {
-            $query->where('areas.draft', $request->input('draft'));
-        }
-        if ($request->has('is_active')) {
-            $query->where('areas.is_active', $request->input('is_active'));
-        }
-        if ($request->has('is_default')) {
-            $query->where('areas.is_default', $request->input('is_default'));
-        }
-        if ($request->has('is_deleted')) {
-            if ($request->input('is_deleted') == 1) {
-                $query->whereNotNull('areas.deleted_at');
-            } else {
-                $query->whereNull('areas.deleted_at');
-            }
-        }
-        if ($request->has('is_updated')) {
-            if ($request->input('is_updated') == 1) {
-                $query->whereNotNull('areas.updated_at');
-            } else {
-                $query->whereNull('areas.updated_at');
-            }
-        }
-        if ($request->has('country_id')) {
-            $query->where('areas.country_id', $request->input('country_id'));
-        }
-        if ($request->has('state_id')) {
-            $query->where('areas.state_id', $request->input('state_id'));
-        }
-        if ($request->has('city_id')) {
-            $query->where('areas.city_id', $request->input('city_id'));
-        }
-
-        $list = $query->get();
-        return $list;
-    }
-    public function store(array $data)
+    public function store(array $data, $userId)
     {
         DB::beginTransaction();
         try {
-            // Set drafted_at timestamp if it's a draft
-            if (isset($data['draft'])) {
-                if($data['draft'] == 1) {
-                    $data['drafted_at'] = now();
-                    $data['is_active'] = 0;
-                } else {
-                    $data['is_active'] = 1;
-                }
-            } else {
-                $data['is_active'] = 1;
-            }
-
+            $data['user_id'] = $userId;
+            $data['calculate_booking_price'] = $this->calculateBookingPrice($data['price'], $data['booking_price']);
             // Create the Area record in the database
-            $area = Area::create($data);
-
-            $this->areaHistoryCreate('Area Add');
+            $created = Room::create($data);
 
             DB::commit();
 
-            return $area;
+            return $created;
         } catch (Exception $e) {
             DB::rollBack();
 
             // Log the error
-            Log::error('Error in storing Area: ' , [
+            Log::error('Error in storing data: ' , [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'line' => $e->getLine(),
@@ -102,49 +45,81 @@ class HotelRepository
             return null;
         }
     }
-
-    public function update(Area $area, array $data)
+    public function update(Hotel $hotel, array $data, $userId)
     {
         DB::beginTransaction();
         try {
-            // Set drafted_at timestamp if it's a draft
-            if (isset($data['draft'])) {
-                if($data['draft'] == 1) {
-                    $data['drafted_at'] = now();
-                    $data['is_active'] = 0;
-                } else {
-                    $data['is_active'] = 1;
-                }
-            } else {
-                $data['is_active'] = 1;
-            }
+            $user = User::where('id', $userId)->first();
+            $user->full_name = $data['full_name'] ?? $user->full_name;
+            $user->email = $data['email'] ?? $user->email;
+            $user->update();
 
+            $previousPercentage = $hotel->booking_percentage;
             // Perform the update
-            $area->update($data);
-            // Soft delete the record if 'is_delete' is 1
-            if (isset($data['is_delete'])) {
-                if ($data['is_delete'] == 1) {
-                    $this->delete($area);
-                } else {
-                    $area->update([
-                        'is_deleted' => 0,
-                        'deleted_at' => null,
-                        'is_active' => 1,
-                        'draft' => 0
-                    ]);
-                    $this->areaHistoryCreate('Area Updated');
+            $hotel->hotel_name = $data['hotel_name'] ?? $hotel->hotel_name;
+            $hotel->hotel_address = $data['hotel_address'] ?? $hotel->hotel_address;
+            $hotel->hotel_description = $data['hotel_description'] ?? $hotel->hotel_description;
+            $hotel->booking_percentage = $data['booking_percentage'] ?? $hotel->booking_percentage;
+            $hotel->update();
+
+            if (
+                isset($data['booking_percentage']) &&
+                $data['booking_percentage'] != $previousPercentage
+            ) {
+                $rooms = Room::where('hotel_id', $hotel->id)->get();
+
+                foreach ($rooms as $room) {
+                    $room->booking_price = $this->calculateBookingPrice(
+                        $room->price,
+                        $hotel->booking_percentage
+                    );
+                    $room->save();
                 }
-            } else {
-                $this->areaHistoryCreate('Area Updated');
+            }
+
+            if (!empty($data['images'])) {
+                $s3 = app(S3Service::class);
+
+                $oldImages = HotelImg::where('hotel_id', $hotel->id)->get();
+                if (count($oldImages) > 0) {
+                    foreach ($oldImages as $img) {
+                        if ($img->image_path) {
+                            $s3->delete($img->image_path);
+                        }
+                        $img->delete();
+                    }
+                }
+
+                $hotelId = $hotel->id;
+                if (!empty($data['images'])) {
+                    foreach ($data['images'] as $file) {
+                        $image_url = null;
+                        $image_path = null;
+
+                        $result = $s3->upload($file, 'hotel');
+
+                        if ($result) {
+                            $image_url = $result['url'];
+                            $image_path = $result['path'];
+                        }
+
+                        HotelImg::create([
+                            'user_id'   => $userId,
+                            'hotel_id'  => $hotelId,
+                            'image_url'   => $image_url,
+                            'image_path'  => $image_path,
+                        ]);
+                    }
+                }
             }
 
             DB::commit();
-            return $area;
+            return $hotel;
         } catch (Exception $e) {
             DB::rollBack();
 
             // Log the error
-            Log::error('Error updating Area: ' , [
+            Log::error('Error updating data: ' , [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'line' => $e->getLine(),
@@ -154,33 +129,27 @@ class HotelRepository
             return null;
         }
     }
-    public function delete(Area $area): bool
+    public function delete(Room $room)
     {
         DB::beginTransaction();
         try {
-            $area->update([
-                'is_deleted' => 1,
-                'is_active' => 0,
-                'draft' => 1,
-                'drafted_at' => now()
-            ]);
             // Perform soft delete
-            $deleted = $area->delete();
+            $deleted = $room->delete();
+
             if (!$deleted) {
                 DB::rollBack();
                 return false;
             }
 
-            $this->areaHistoryCreate('Area Deleted');
-
             DB::commit();
             return true;
+
         } catch (Exception $e) {
             DB::rollBack();
 
             // Log error
-            Log::error('Error deleting Area: ' , [
-                'state_id' => $area->id,
+            Log::error('Error deleting data: ' , [
+                'id' => $room->id,
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'line' => $e->getLine(),
@@ -190,187 +159,49 @@ class HotelRepository
             return false;
         }
     }
-    public function find($id)
+    public function find($id, $userId)
     {
-        return Area::withTrashed()->find($id);
+        return Hotel::with('package', 'images')
+            ->where('user_id', $userId)
+            ->find($id);
     }
-    public function getData($id)
+    public function checkExist($userId, $hotelId, $floorId)
     {
-        $area = Area::withTrashed()
-            ->leftJoin('countries', 'countries.id', '=', 'areas.country_id')
-            ->leftJoin('states', 'states.id', '=', 'areas.state_id')
-            ->leftJoin('cities', 'cities.id', '=', 'areas.city_id')
-            ->where('areas.id', $id)
-            ->select(
-                'areas.*',
-                'countries.name as country_name',
-                'states.name as state_name',
-                'cities.name as city_name'
-            )
-            ->first();
-        return $area;
+        $checkValid = Floor::where('user_id', $userId)
+            ->where('hotel_id', $hotelId)
+            ->where('id', $floorId)
+            ->where('status', 'Active')
+            ->exists();
+        return $checkValid;
     }
-    public function bulkUpdate($request)
+    public function checkEmailExist($userId, $email)
     {
-        DB::beginTransaction();
-        try {
-            foreach ($request->areas as $data) {
-                $area = Area::find($data['id']);
-
-                if (!$area) {
-                    continue; // Skip if city not found
-                }
-
-                // Update state details
-                $area->update([
-                    'code' => $data['code'] ?? $area->code,
-                    'name' => $data['name'] ?? $area->name,
-                    'name_in_bangla' => $data['name_in_bangla'] ?? $area->name_in_bangla,
-                    'name_in_arabic' => $data['name_in_arabic'] ?? $area->name_in_arabic,
-                    'is_default' => $data['is_default'] ?? $area->is_default,
-                    'draft' => $data['draft'] ?? $area->draft,
-                    'drafted_at' => (isset($data['draft']) && $data['draft'] == 1) ? now() : $area->drafted_at,
-                    'is_active' => ((isset($data['draft']) && $data['draft'] == 1)) ? 0 : 1,
-                    'country_id' => $data['country_id'] ?? $area->country_id,
-                    'state_id' => $data['state_id'] ?? $area->state_id,
-                    'city_id' => $data['city_id'] ?? $area->city_id,
-                ]);
-                $this->areaHistoryCreate('Area Updated');
-            }
-
-            DB::commit();
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            // Log the error
-            Log::error('Error Bulk updating Area: ', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return null;
-        }
+        $checkEmailExist = User::where('email', $email)
+            ->where('id', '!=', $userId)
+            ->exists();
+        return $checkEmailExist;
     }
-    private function areaHistoryCreate(string $actionType, $exportPdf = false, $exportXls = false, $exportPrint = false): bool
+    public function checkNameUpdateExist($id, $userId, $hotelId,$floorId,$roomNo)
     {
-        DB::beginTransaction();
-        try {
-            // Get the authenticated user
-            $user = Auth::user();
+        $checkNameExist = Room::where('user_id', $userId)
+            ->where('hotel_id', $hotelId)
+            ->where('floor_id', $floorId)
+            ->where('room_no', $roomNo)
+            ->where('id', '!=', $id)
+            ->exists();
 
-            AreaHistory::create([
-                'client_id' => $user->admin_client_id ?? null,
-                'action_date' => now(),
-                'action_by' => $user->name ?? null,
-                'action_type' => $actionType,
-                'export_pdf' => $exportPdf,
-                'export_xls' => $exportXls,
-                'export_print' => $exportPrint,
-            ]);
-            DB::commit();
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            // Log the error
-            Log::error('Error creating area history', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return false;
-        }
+        return $checkNameExist;
     }
-    public function checkAvailability(array $data): bool
-    {
-        try {
-            $code = $data['code'] ?? null;
-            $name = $data['name'] ?? null;
-
-            // Check if either code or name already exists
-            $exists = Area::where(function ($query) use ($code, $name) {
-                if ($code) {
-                    $query->orWhere('code', $code);
-                }
-                if ($name) {
-                    $query->orWhere('name', $name);
-                }
-            })
-                ->exists();
-
-            // Return true if no match (available), false if exists (not available)
-            return $exists;
-        } catch (\Exception $e) {
-            Log::error('Error checking area availability', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Default to false (not available) on error
-            return false;
-        }
+    private function calculateBookingPrice($price, $bookingPrice) {
+        $value = ($price * $bookingPrice) / 100;
+        return ceil($value);
     }
-    public function history()
+    public function checkBookingPercentage($userId, $hotelId)
     {
-        try {
-            $history = AreaHistory::orderBy('id', 'desc')->get();
-            return $history;
-        } catch (\Exception $e) {
-            Log::error('Error checking area history', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+        $checkBookingPercentage = Hotel::where('user_id', $userId)
+            ->where('id', $hotelId)
+            ->value('booking_percentage');
 
-            // Default to false (not available) on error
-            return false;
-        }
-    }
-    public function import($request)
-    {
-        DB::beginTransaction();
-        try {
-            foreach ($request->areas as $data) {
-                // create data
-                $area = Area::create([
-                    'code' => isset($data['code']) ?? '',
-                    'name' => isset($data['name']) ?? '',
-                    'name_in_bangla' => isset($data['name_in_bangla']) ?? null,
-                    'name_in_arabic' => isset($data['name_in_arabic']) ?? null,
-                    'is_default' => isset($data['is_default']) ?? 0,
-                    'draft' => !empty($data['draft']) ? 1 : 0,
-                    'drafted_at' => (isset($data['draft']) && $data['draft'] == 1) ? now() : null,
-                    'is_active' => !empty($data['is_active']) ? 1 : 0,
-                    'country_id' => $data['country_id'] ?? null,
-                    'state_id' => $data['state_id'] ?? null,
-                    'city_id' => $data['city_id'] ?? null,
-                ]);
-
-                $this->areaHistoryCreate('Area Created');
-            }
-
-            DB::commit();
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            // Log the error
-            Log::error('Error bulk import area: ', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return null;
-        }
+        return $checkBookingPercentage;
     }
 }

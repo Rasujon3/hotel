@@ -22,70 +22,76 @@ class HotelController extends AppBaseController
         $data = $this->hotelRepository->all($userId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
-
     // Store data
     public function store(HotelRequest $request)
     {
-        $area = $this->hotelRepository->store($request->all());
-        if (!$area) {
-            return $this->sendError('Something went wrong!!! [AS-01]', 500);
-        }
-        return $this->sendResponse($area, 'Area created successfully!');
-    }
+        $userId = getUser()?->id;
+        $hotelId = $request->hotel_id;
+        $name = $request->name;
 
-    // Get single details data
-    public function show($area)
-    {
-        $data = $this->hotelRepository->find($area);
-        if (!$data) {
-            return $this->sendError('Area not found');
+        $checkValid = $this->floorRepository->checkValid($userId, $hotelId);
+        if (!$checkValid) {
+            return $this->sendError('Hotel not found.', 404);
         }
-        $summary = $this->hotelRepository->getData($area);
-        return $this->sendResponse($summary, 'Area retrieved successfully.');
+
+        $checkNameExist = $this->floorRepository->checkNameExist($userId, $hotelId, $name);
+        if ($checkNameExist) {
+            return $this->sendError('Floor name already exist.', 404);
+        }
+
+        $store = $this->floorRepository->store($request->all(),$userId);
+        if (!$store) {
+            return $this->sendError('Something went wrong!!! [FC-01]', 500);
+        }
+
+        return $this->sendResponse($store, 'Data created successfully!');
+    }
+    // Get single details data
+    public function show($floor)
+    {
+        $userId = getUser()?->id;
+
+        $data = $this->floorRepository->find($floor, $userId);
+        if (!$data) {
+            return $this->sendError('Data not found');
+        }
+
+        return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Update data
-    public function update(HotelRequest $request, $area)
+    public function update(HotelRequest $request, $id)
     {
-        $data = $this->hotelRepository->find($area);
+        $userId = getUser()?->id;
+        $email = $request->email ?? null;
+
+        $data = $this->hotelRepository->find($id, $userId);
         if (!$data) {
-            return $this->sendError('Area not found');
+            return $this->sendError('Data not found');
         }
-        $updated = $this->hotelRepository->update($data, $request->all());
+
+        $checkEmailExist = $this->hotelRepository->checkEmailExist($userId, $email);
+        if ($checkEmailExist) {
+            return $this->sendError('Email already exist.', 409);
+        }
+
+        $updated = $this->hotelRepository->update($data, $request->all(), $userId);
         if (!$updated) {
-            return $this->sendError('Something went wrong!!! [AU-04]', 500);
+            return $this->sendError('Something went wrong!!! [HC-02]', 500);
         }
-        return $this->sendResponse($area, 'Area updated successfully!');
+
+        return $this->sendResponse($updated, 'Data updated successfully!');
     }
-    // bulk update
-    public function bulkUpdate(HotelRequest $request)
+
+    // Delete data
+    public function destroy($id)
     {
-        $bulkUpdate = $this->hotelRepository->bulkUpdate($request);
-        if (!$bulkUpdate) {
-            return $this->sendError('Something went wrong!!! [ABU-05]', 500);
+        $userId = getUser()?->id;
+
+        $data = $this->floorRepository->find($id, $userId);
+        if (!$data) {
+            return $this->sendError('Data not found');
         }
-        return $this->sendResponse([],'Area Bulk updated successfully!');
-    }
-    // check availability
-    public function checkAvailability(HotelRequest $request)
-    {
-        $checkAvailability = $this->hotelRepository->checkAvailability($request->all());
-        if ($checkAvailability) {
-            return $this->sendError('Area is already exist!', 500);
-        }
-        return $this->sendResponse([],'Area is available!');
-    }
-    // history
-    public function history()
-    {
-        $history = $this->hotelRepository->history();
-        return $this->sendResponse($history,'Area history retrieved successfully.');
-    }
-    public function import(HotelRequest $request)
-    {
-        $import = $this->hotelRepository->import($request);
-        if (!$import) {
-            return $this->sendError('Something went wrong!!! [CCBU-06]', 500);
-        }
-        return $this->sendResponse([],'City imported successfully!');
+        $this->floorRepository->delete($data);
+        return $this->sendSuccess('Data deleted successfully!');
     }
 }

@@ -31,7 +31,6 @@ class RoomController extends AppBaseController
         $data = $this->roomRepository->all($userId, $hotelId, $floorId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
-
     // Store data
     public function store(RoomRequest $request)
     {
@@ -40,14 +39,19 @@ class RoomController extends AppBaseController
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
 
-        $checkExist = $this->roomRepository->checkExist($userId, $hotelId);
+        $checkExist = $this->roomRepository->checkExist($userId, $hotelId, $floorId);
         if (!$checkExist) {
             return $this->sendError('No data found.', 404);
         }
 
         $checkNameExist = $this->roomRepository->checkNameExist($userId, $hotelId, $floorId, $roomNo);
         if ($checkNameExist) {
-            return $this->sendError('Room no already exist.', 404);
+            return $this->sendError('Room no already exist.', 409);
+        }
+
+        $checkBookingPercentage = $this->roomRepository->checkBookingPercentage($userId, $hotelId);
+        if (!$checkBookingPercentage) {
+            return $this->sendError('Please add booking percentage.', 400);
         }
 
         $store = $this->roomRepository->store($request->all(), $userId);
@@ -56,7 +60,6 @@ class RoomController extends AppBaseController
         }
         return $this->sendResponse($store, 'Data created successfully!');
     }
-
     // Get single details data
     public function show($id)
     {

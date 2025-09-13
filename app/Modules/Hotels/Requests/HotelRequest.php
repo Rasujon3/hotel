@@ -3,6 +3,7 @@
 namespace App\Modules\Hotels\Requests;
 
 use App\Modules\Areas\Models\Area;
+use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Foundation\Http\FormRequest;
 
 class HotelRequest extends FormRequest
@@ -28,6 +29,7 @@ class HotelRequest extends FormRequest
         // Get the route name and apply null-safe operator
         $routeName = $this->route()?->getName();
 
+        /*
         if ($routeName === 'areas.import') {
             return Area::importRules();
         }
@@ -42,7 +44,12 @@ class HotelRequest extends FormRequest
         if ($routeName === 'areas.checkAvailability') {
             return Area::checkAvailabilityRules();
         }
-        $areaId = $this->route('area') ?: null;
-        return Area::rules($areaId);
+        */
+
+        if ($routeName === 'hotels.update') {
+            return Hotel::updateRules();
+        }
+        $id = $this->route('hotel') ?: null;
+        return Hotel::rules($id);
     }
 }
