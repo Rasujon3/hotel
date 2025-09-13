@@ -3,9 +3,12 @@
 namespace App\Modules\Packages\Models;
 
 use App\Models\User;
+use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 
@@ -36,5 +39,9 @@ class Package extends Model
             'status' => 'required|in:Active,Inactive',
 
         ];
+    }
+    public function hotels(): HasOne
+    {
+        return $this->hasOne(Hotel::class);
     }
 }

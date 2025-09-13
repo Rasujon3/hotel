@@ -10,7 +10,3 @@ Route::prefix('v1/floors')->middleware(['auth:sanctum', 'owner'])->group(functio
     Route::post('/update/{floor}', [FloorController::class, 'update'])->name('floors.update'); // Update data
     Route::delete('/delete/{floor}', [FloorController::class, 'destroy'])->name('floors.delete'); // Delete data
 });
-
-Route::prefix('v1')->middleware(['auth:sanctum', 'owner'])->group(function () {
-    Route::get('hotels/my-hotel-list', [FloorController::class, 'myHotelList'])->name('hotels.my-hotel-list');
-});

@@ -5,6 +5,8 @@ namespace App\Modules\Rooms\Repositories;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
+use App\Modules\Rooms\Models\RoomImg;
+use App\Services\S3Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -13,8 +15,7 @@ class RoomRepository
 {
     public function all($userId, $hotelId, $floorId)
     {
-        $data = Room::with('hotel', 'floor')
-            ->where('user_id', $userId)
+        $data = Room::with('images','hotel', 'floor')
             ->where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->get();
@@ -25,10 +26,48 @@ class RoomRepository
     {
         DB::beginTransaction();
         try {
+            $rent = $data['rent'];
+            $hotelId = $data['hotel_id'];
+            $floorId = $data['floor_id'];
+            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
+
             $data['user_id'] = $userId;
-            $data['calculate_booking_price'] = $this->calculateBookingPrice($data['price'], $data['booking_price']);
-            // Create the Area record in the database
+            $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
+
+            // icon
+            $data['icon'] = null;
+            $iconUrl = getBedIcon($data['bed_type'], $data['num_of_beds']);
+            if ($iconUrl) {
+                $data['icon'] = $iconUrl;
+            }
+
+            // Create the data record in the database
             $created = Room::create($data);
+
+            // img upload
+            if (!empty($data['images'])) {
+                $s3 = app(S3Service::class);
+                foreach ($data['images'] as $file) {
+                    $image_url = null;
+                    $image_path = null;
+
+                    $result = $s3->upload($file, 'room');
+
+                    if ($result) {
+                        $image_url = $result['url'];
+                        $image_path = $result['path'];
+                    }
+
+                    RoomImg::create([
+                        'user_id' => $userId,
+                        'hotel_id' => $hotelId,
+                        'floor_id' => $floorId,
+                        'room_id' => $created->id,
+                        'image_url'  => $image_url,
+                        'image_path' => $image_path,
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -51,13 +90,63 @@ class RoomRepository
     {
         DB::beginTransaction();
         try {
-            $data['user_id'] = $userId;
-            $data['calculate_booking_price'] = $this->calculateBookingPrice($data['price'], $data['booking_price']);
+            $rent = $data['rent'] ?? $room->rent;
+            $hotelId = $data['hotel_id'];
+            $floorId = $data['floor_id'];
+            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
+
+            $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
+
+            // icon
+            $data['icon'] = null;
+            $iconUrl = getBedIcon($data['bed_type'], $data['num_of_beds']);
+            if ($iconUrl) {
+                $data['icon'] = $iconUrl;
+            }
             // Perform the update
             $room->update($data);
 
+            // img update
+            if (!empty($data['images'])) {
+                $s3 = app(S3Service::class);
+
+                $oldImages = RoomImg::where('room_id', $room->id)->get();
+                if (count($oldImages) > 0) {
+                    foreach ($oldImages as $img) {
+                        if ($img->image_path) {
+                            $s3->delete($img->image_path);
+                        }
+                        $img->delete();
+                    }
+                }
+
+                $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
+                if (!empty($data['images'])) {
+                    foreach ($data['images'] as $file) {
+                        $image_url = null;
+                        $image_path = null;
+
+                        $result = $s3->upload($file, 'floor');
+
+                        if ($result) {
+                            $image_url = $result['url'];
+                            $image_path = $result['path'];
+                        }
+
+                        RoomImg::create([
+                            'user_id' => $userId,
+                            'hotel_id' => $hotelId,
+                            'floor_id' => $floorId,
+                            'room_id' => $room->id,
+                            'image_url'  => $image_url,
+                            'image_path' => $image_path,
+                        ]);
+                    }
+                }
+            }
+
             DB::commit();
-            return $room;
+            return $this->find($room->id);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -76,13 +165,24 @@ class RoomRepository
     {
         DB::beginTransaction();
         try {
-            // Perform soft delete
-            $deleted = $room->delete();
+            // 2. Get all floor images
+            $oldImages = $room->images; // Use the relationship property to get the collection
 
-            if (!$deleted) {
-                DB::rollBack();
-                return false;
+            // 3. Delete images from S3
+            if ($oldImages->isNotEmpty()) {
+                $s3 = app(S3Service::class);
+                foreach ($oldImages as $img) {
+                    if ($img->image_path) {
+                        $s3->delete($img->image_path);
+                    }
+                }
             }
+
+            // 4. Delete the image records from the database
+            $room->images()->delete();
+
+            // 5. Finally, delete itself
+            $room->delete();
 
             DB::commit();
             return true;
@@ -104,14 +204,12 @@ class RoomRepository
     }
     public function find($id)
     {
-        return Room::with('hotel', 'floor')->find($id);
+        return Room::with('images','hotel', 'floor')->find($id);
     }
     public function checkExist($userId, $hotelId, $floorId)
     {
-        $checkValid = Floor::where('user_id', $userId)
-            ->where('hotel_id', $hotelId)
+        $checkValid = Floor::where('hotel_id', $hotelId)
             ->where('id', $floorId)
-            ->where('status', 'Active')
             ->exists();
         return $checkValid;
     }
@@ -126,18 +224,13 @@ class RoomRepository
     }
     public function checkNameUpdateExist($id, $userId, $hotelId,$floorId,$roomNo)
     {
-        $checkNameExist = Room::where('user_id', $userId)
-            ->where('hotel_id', $hotelId)
+        $checkNameExist = Room::where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->where('room_no', $roomNo)
             ->where('id', '!=', $id)
             ->exists();
 
         return $checkNameExist;
-    }
-    private function calculateBookingPrice($price, $bookingPrice) {
-        $value = ($price * $bookingPrice) / 100;
-        return ceil($value);
     }
     public function checkBookingPercentage($userId, $hotelId)
     {

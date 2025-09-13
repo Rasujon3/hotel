@@ -52,6 +52,10 @@ class RoomRequest extends FormRequest
             return Room::listRules();
         }
 
+        if ($routeName === 'rooms.update') {
+            return Room::updateRules();
+        }
+
         $id = $this->route('room') ?: null;
         return Room::rules($id);
     }
