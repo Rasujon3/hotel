@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Packages\Models\Package;
+use App\Modules\Ratings\Models\Rating;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -88,5 +89,9 @@ class Hotel extends Model
     public function facilities(): HasMany
     {
         return $this->hasMany(Facility::class);
+    }
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
     }
 }
