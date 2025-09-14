@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\AllowMultipleRoles;
 use App\Http\Middleware\OwnerMiddleware;
+use App\Http\Middleware\ReceptionistMiddleware;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'super_admin' => SuperAdminMiddleware::class,
             'owner' => OwnerMiddleware::class,
+            'receptionist' => ReceptionistMiddleware::class,
+            'roles' => AllowMultipleRoles::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

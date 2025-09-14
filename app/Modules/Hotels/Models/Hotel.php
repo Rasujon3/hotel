@@ -3,6 +3,7 @@
 namespace App\Modules\Hotels\Models;
 
 use App\Models\User;
+use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Packages\Models\Package;
 use App\Modules\Rooms\Models\Room;
@@ -83,5 +84,9 @@ class Hotel extends Model
     public function images(): HasMany
     {
         return $this->hasMany(HotelImg::class, 'hotel_id');
+    }
+    public function facilities(): HasMany
+    {
+        return $this->hasMany(Facility::class);
     }
 }
