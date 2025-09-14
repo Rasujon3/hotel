@@ -13,23 +13,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 
-class Booking extends Model
+class BookingDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'bookings';
+    protected $table = 'booking_details';
 
     protected $fillable = [
         'user_id',
-        'booking_detail_id',
+        'hotel_id',
+        'floor_id',
+        'room_id',
         'booking_start_date',
         'booking_end_date',
         'check_in',
         'check_out',
-        'total',
-        'paid',
-        'due',
-        'status',
     ];
 
     protected $hidden = [
@@ -55,10 +53,6 @@ class Booking extends Model
             'booking_end_date' => 'required|date|after:booking_start_date',
             'check_in' => 'nullable|date|after_or_equal:booking_start_date',
             'check_out' => 'nullable|date|after:check_in',
-            'total' => 'required|numeric|min:1',
-            'paid' => 'nullable|numeric|min:0',
-            'due' => 'nullable|numeric|min:0',
-            'status' => 'nullable|in:pending,confirmed,checked_in,checked_out,cancelled',
         ];
     }
 
