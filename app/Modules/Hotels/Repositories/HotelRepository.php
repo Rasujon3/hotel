@@ -76,7 +76,7 @@ class HotelRepository
 
                 foreach ($rooms as $room) {
                     $room->booking_price = $this->calculateBookingPrice(
-                        $room->price,
+                        $room->rent,
                         $hotel->booking_percentage
                     );
                     $room->save();
