@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Modules\Hotels\Requests;
+namespace App\Modules\WithdrawalMethods\Requests;
 
 use App\Modules\Areas\Models\Area;
-use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Packages\Models\Package;
+use App\Modules\Rooms\Models\Room;
 use Illuminate\Foundation\Http\FormRequest;
 
-class HotelRequest extends FormRequest
+class WithdrawalMethodRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -44,16 +45,18 @@ class HotelRequest extends FormRequest
         if ($routeName === 'areas.checkAvailability') {
             return Area::checkAvailabilityRules();
         }
+        $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'hotels.update') {
-            return Hotel::updateRules();
+        if ($routeName === 'rooms.list') {
+            return Room::listRules();
         }
 
-        if ($routeName === 'hotels.check-balance') {
-            return Hotel::checkBalanceRules();
+        if ($routeName === 'rooms.update') {
+            return Room::updateRules();
         }
-        $id = $this->route('hotel') ?: null;
-        return Hotel::rules($id);
+
+        $id = $this->route('room') ?: null;
+        return Room::rules($id);
     }
 }

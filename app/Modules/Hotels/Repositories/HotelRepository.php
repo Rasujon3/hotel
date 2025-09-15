@@ -6,6 +6,7 @@ namespace App\Modules\Hotels\Repositories;
 use App\Models\User;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
+use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
 use App\Services\S3Service;
 use Carbon\Carbon;
@@ -15,9 +16,22 @@ use Exception;
 
 class HotelRepository
 {
-    public function all($userId)
+    public function all($userId, $userTypeId)
     {
-        $data = Hotel::with('images', 'package')->where('user_id',$userId)->get();
+        $data = [];
+        if ($userTypeId == 4) {
+            $hotelId = Receptionist::where('user_id', $userId)->value('hotel_id');
+            $data = Hotel::with('images', 'package')->where('id', $hotelId)->get();
+        } else {
+            $data = Hotel::with('images', 'package')->where('user_id',$userId)->get();
+        }
+
+        return $data;
+    }
+    public function checkBalance($hotelId)
+    {
+        $data = Hotel::where('id', $hotelId)->value('balance');
+
         return $data;
     }
     public function store(array $data, $userId)

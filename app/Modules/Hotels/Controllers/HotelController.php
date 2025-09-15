@@ -18,8 +18,23 @@ class HotelController extends AppBaseController
     public function index()
     {
         $userId = getUser()?->id;
+        $userTypeId = getUser()?->user_type_id;
 
-        $data = $this->hotelRepository->all($userId);
+        $data = $this->hotelRepository->all($userId, $userTypeId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+    // Fetch all data
+    public function checkBalance(HotelRequest $request)
+    {
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->type_id);
+        $hotelId = $request->hotel_id;
+
+        if (!in_array($request->hotel_id, $userHotelIds, true)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
+        $data = $this->hotelRepository->checkBalance($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Store data

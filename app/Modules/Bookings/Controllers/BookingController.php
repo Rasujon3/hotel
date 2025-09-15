@@ -69,7 +69,7 @@ class BookingController extends AppBaseController
         $store = $this->bookingRepository->store($request->all(), $userId, $hotelId);
 
         if (!$store) {
-            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+            return $this->sendError('Something went wrong!!! [BC-01]', 500);
         }
 
         return $this->sendResponse($store, 'Data created successfully!');

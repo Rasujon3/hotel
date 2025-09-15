@@ -49,7 +49,7 @@ class Booking extends Model
     {
         return [
             // Booking main fields
-            'hotel_id'           => ['required', 'integer', 'exists:hotels,id'],
+            'hotel_id'           => ['nullable', 'integer', 'exists:hotels,id'],
             'booking_start_date' => ['required', 'date', 'after_or_equal:today'],
             'booking_end_date'   => ['required', 'date', 'after:booking_start_date'],
             'check_in'           => ['nullable', 'date'],

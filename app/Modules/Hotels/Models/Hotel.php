@@ -27,6 +27,7 @@ class Hotel extends Model
         'hotel_address',
         'lat',
         'long',
+        'balance',
         'status',
         'booking_percentage',
         'check_in_time',
@@ -64,6 +65,12 @@ class Hotel extends Model
             'booking_percentage' => 'nullable|numeric|min:1|max:100',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+        ];
+    }
+    public static function checkBalanceRules()
+    {
+        return [
+            'hotel_id'    => 'nullable|exists:hotels,id',
         ];
     }
     public function user() : belongsTo

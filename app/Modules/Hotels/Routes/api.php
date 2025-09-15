@@ -4,8 +4,9 @@ use App\Modules\Hotels\Controllers\HotelController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix('v1/hotels')->middleware('auth:sanctum')->group(function () {
+Route::prefix('v1/hotels')->middleware(['auth:sanctum', 'roles:owner,receptionist'])->group(function () {
     Route::get('/my-hotel-list', [HotelController::class, 'index'])->name('hotels.list'); // List data
+    Route::post('/check-balance', [HotelController::class, 'checkBalance'])->name('hotels.check-balance'); // List data
     Route::post('/create', [HotelController::class, 'store'])->name('hotels.store'); // Create data
     Route::get('/view/{hotel}', [HotelController::class, 'show'])->name('hotels.view'); // View data
     Route::post('/update/{hotel}', [HotelController::class, 'update'])->name('hotels.update'); // Update data

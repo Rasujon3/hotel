@@ -38,14 +38,14 @@ class BookingRepository
                 'check_in' => $data['check_in'] ?? null,
                 'check_out' => $data['check_out'] ?? null,
                 'total' => $data['total'],
-                'paid' => $data['paid'],
+                'paid' => $data['payment']['amount'],
                 'due' => $data['total'] - $data['paid'],
                 'status' => 'confirmed',
             ]);
 
             // 2. Add booking details (multiple rooms)
             foreach ($data['rooms'] as $room) {
-                // 1️⃣ Store booking details
+                // i. Store booking details
                 BookingDetail::create([
                     'booking_id' => $booking->id,
                     'user_id' => $userId,
@@ -55,7 +55,7 @@ class BookingRepository
                     'booking_start_date' => $data['booking_start_date'],
                     'booking_end_date' => $data['booking_end_date'],
                 ]);
-                // 2️⃣ Update the corresponding room status and booking times
+                // ii. Update the corresponding room status and booking times
                 Room::where('id', $room['room_id'])
                     ->update([
                         'start_booking_time' => $data['booking_start_date'],
@@ -76,6 +76,11 @@ class BookingRepository
                 'reference' => $data['payment']['reference'] ?? null,
                 'created_by' => $userId,
             ]);
+
+            // 4. Balance add on hotels table
+            $hotel = Hotel::where('id', $hotelId)->first();
+            $hotel->balance = $hotel->balance + $data['payment']['amount'];
+            $hotel->update();
 
             DB::commit();
             return $booking;
