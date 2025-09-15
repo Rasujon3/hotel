@@ -42,6 +42,21 @@ class AdminController extends AppBaseController
 
         return $this->sendResponse([], 'Data created successfully!');
     }
+    public function ownerWithdrawAdd(AdminRequest $request)
+    {
+        $hotelId = $request->hotel_id;
+        $checkExist = $this->adminRepository->checkExist($request->user_id, $hotelId);
+        if (!$checkExist) {
+            return $this->sendError('User or Hotel not Found.', 500);
+        }
+
+        $update = $this->adminRepository->updateStatus($request->user_id, $request->package_id, $hotelId);
+        if (!$update) {
+            return $this->sendError('Something went wrong!!! [AC-01]', 500);
+        }
+
+        return $this->sendResponse([], 'Data created successfully!');
+    }
 
     // Get single details data
     public function show($package)

@@ -48,6 +48,10 @@ class AdminRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
+        if ($routeName === 'owner-withdraw-add') {
+            return User::ownerWithdrawRules();
+        }
+
         $id = $this->route('admin') ?: null;
         return User::statusUpdateRules();
     }
