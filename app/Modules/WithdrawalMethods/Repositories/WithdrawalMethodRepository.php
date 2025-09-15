@@ -6,6 +6,7 @@ use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
 use App\Modules\Rooms\Models\RoomImg;
+use App\Modules\WithdrawalMethods\Models\WithdrawalMethod;
 use App\Services\S3Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,11 +14,10 @@ use Exception;
 
 class WithdrawalMethodRepository
 {
-    public function all($userId, $hotelId, $floorId)
+    public function all($hotelId)
     {
-        $data = Room::with('images','hotel', 'floor')
+        $data = WithdrawalMethod::with('hotel')
             ->where('hotel_id', $hotelId)
-            ->where('floor_id', $floorId)
             ->get();
 
         return $data;
@@ -26,48 +26,10 @@ class WithdrawalMethodRepository
     {
         DB::beginTransaction();
         try {
-            $rent = $data['rent'];
-            $hotelId = $data['hotel_id'];
-            $floorId = $data['floor_id'];
-            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
-
             $data['user_id'] = $userId;
-            $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
-
-            // icon
-            $data['icon'] = null;
-            $iconUrl = getBedIcon($data['bed_type'], $data['num_of_beds']);
-            if ($iconUrl) {
-                $data['icon'] = $iconUrl;
-            }
 
             // Create the data record in the database
-            $created = Room::create($data);
-
-            // img upload
-            if (!empty($data['images'])) {
-                $s3 = app(S3Service::class);
-                foreach ($data['images'] as $file) {
-                    $image_url = null;
-                    $image_path = null;
-
-                    $result = $s3->upload($file, 'room');
-
-                    if ($result) {
-                        $image_url = $result['url'];
-                        $image_path = $result['path'];
-                    }
-
-                    RoomImg::create([
-                        'user_id' => $userId,
-                        'hotel_id' => $hotelId,
-                        'floor_id' => $floorId,
-                        'room_id' => $created->id,
-                        'image_url'  => $image_url,
-                        'image_path' => $image_path,
-                    ]);
-                }
-            }
+            $created = WithdrawalMethod::create($data);
 
             DB::commit();
 
@@ -86,67 +48,15 @@ class WithdrawalMethodRepository
             return null;
         }
     }
-    public function update(Room $room, array $data, $userId)
+    public function update(WithdrawalMethod $withdrawalMethod, array $data, $userId)
     {
         DB::beginTransaction();
         try {
-            $rent = $data['rent'] ?? $room->rent;
-            $hotelId = $data['hotel_id'];
-            $floorId = $data['floor_id'];
-            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
-
-            $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
-
-            // icon
-            $data['icon'] = null;
-            $iconUrl = getBedIcon($data['bed_type'], $data['num_of_beds']);
-            if ($iconUrl) {
-                $data['icon'] = $iconUrl;
-            }
             // Perform the update
-            $room->update($data);
-
-            // img update
-            if (!empty($data['images'])) {
-                $s3 = app(S3Service::class);
-
-                $oldImages = RoomImg::where('room_id', $room->id)->get();
-                if (count($oldImages) > 0) {
-                    foreach ($oldImages as $img) {
-                        if ($img->image_path) {
-                            $s3->delete($img->image_path);
-                        }
-                        $img->delete();
-                    }
-                }
-
-                $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
-                if (!empty($data['images'])) {
-                    foreach ($data['images'] as $file) {
-                        $image_url = null;
-                        $image_path = null;
-
-                        $result = $s3->upload($file, 'floor');
-
-                        if ($result) {
-                            $image_url = $result['url'];
-                            $image_path = $result['path'];
-                        }
-
-                        RoomImg::create([
-                            'user_id' => $userId,
-                            'hotel_id' => $hotelId,
-                            'floor_id' => $floorId,
-                            'room_id' => $room->id,
-                            'image_url'  => $image_url,
-                            'image_path' => $image_path,
-                        ]);
-                    }
-                }
-            }
+            $withdrawalMethod->update($data);
 
             DB::commit();
-            return $this->find($room->id);
+            return $this->find($withdrawalMethod->id);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -161,28 +71,12 @@ class WithdrawalMethodRepository
             return null;
         }
     }
-    public function delete(Room $room)
+    public function delete(WithdrawalMethod $withdrawalMethod)
     {
         DB::beginTransaction();
         try {
-            // 2. Get all floor images
-            $oldImages = $room->images; // Use the relationship property to get the collection
-
-            // 3. Delete images from S3
-            if ($oldImages->isNotEmpty()) {
-                $s3 = app(S3Service::class);
-                foreach ($oldImages as $img) {
-                    if ($img->image_path) {
-                        $s3->delete($img->image_path);
-                    }
-                }
-            }
-
-            // 4. Delete the image records from the database
-            $room->images()->delete();
-
             // 5. Finally, delete itself
-            $room->delete();
+            $withdrawalMethod->delete();
 
             DB::commit();
             return true;
@@ -192,7 +86,7 @@ class WithdrawalMethodRepository
 
             // Log error
             Log::error('Error deleting data: ' , [
-                'id' => $room->id,
+                'id' => $withdrawalMethod->id,
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'line' => $e->getLine(),
@@ -204,7 +98,7 @@ class WithdrawalMethodRepository
     }
     public function find($id)
     {
-        return Room::with('images','hotel', 'floor')->find($id);
+        return WithdrawalMethod::with('hotel')->find($id);
     }
     public function checkExist($userId, $hotelId, $floorId)
     {
@@ -213,14 +107,11 @@ class WithdrawalMethodRepository
             ->exists();
         return $checkValid;
     }
-    public function checkNameExist($userId, $hotelId, $floorId, $roomNo)
+    public function checkAlreadyAdded($hotelId)
     {
-        $checkNameExist = Room::where('user_id', $userId)
-            ->where('hotel_id', $hotelId)
-            ->where('floor_id', $floorId)
-            ->where('room_no', $roomNo)
+        $checkAlreadyAdded = WithdrawalMethod::where('hotel_id', $hotelId)
             ->exists();
-        return $checkNameExist;
+        return $checkAlreadyAdded;
     }
     public function checkNameUpdateExist($id, $userId, $hotelId,$floorId,$roomNo)
     {

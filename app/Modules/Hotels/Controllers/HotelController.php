@@ -27,10 +27,10 @@ class HotelController extends AppBaseController
     public function checkBalance(HotelRequest $request)
     {
         $user = getUser();
-        $userHotelIds = getUserHotelIds($user?->id, $user?->type_id);
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        if (!in_array($request->hotel_id, $userHotelIds, true)) {
+        if (!in_array($hotelId, $userHotelIds, false)) {
             return $this->sendError('You can not access this data.', 403);
         }
 

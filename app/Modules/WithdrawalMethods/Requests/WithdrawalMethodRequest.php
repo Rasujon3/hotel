@@ -5,6 +5,7 @@ namespace App\Modules\WithdrawalMethods\Requests;
 use App\Modules\Areas\Models\Area;
 use App\Modules\Packages\Models\Package;
 use App\Modules\Rooms\Models\Room;
+use App\Modules\WithdrawalMethods\Models\WithdrawalMethod;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WithdrawalMethodRequest extends FormRequest
@@ -48,15 +49,11 @@ class WithdrawalMethodRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'rooms.list') {
-            return Room::listRules();
+        if ($routeName === 'withdrawalMethods.list') {
+            return WithdrawalMethod::listRules();
         }
 
-        if ($routeName === 'rooms.update') {
-            return Room::updateRules();
-        }
-
-        $id = $this->route('room') ?: null;
-        return Room::rules($id);
+        $id = $this->route('withdrawalMethod') ?: null;
+        return WithdrawalMethod::rules($id);
     }
 }

@@ -35,9 +35,9 @@ class WithdrawalMethod extends Model
             'hotel_id'       => 'required|exists:hotels,id',
             'payment_method' => 'required|in:bkash,rocket,nagad,bank_account',
             'acc_no'         => 'required|string|max:50',
-            'bank_name'      => 'nullable,bank_account|string|max:100',
-            'branch_name'    => 'nullable,bank_account|string|max:100',
-            'routing_number' => 'nullable,bank_account|string|max:50',
+            'bank_name'      => 'nullable|string|max:100',
+            'branch_name'    => 'nullable|string|max:100',
+            'routing_number' => 'nullable|string|max:50',
         ];
     }
 
@@ -45,7 +45,6 @@ class WithdrawalMethod extends Model
     {
         return [
             'hotel_id'    => 'required|exists:hotels,id',
-            'floor_id'    => 'required|exists:floors,id',
         ];
     }
 

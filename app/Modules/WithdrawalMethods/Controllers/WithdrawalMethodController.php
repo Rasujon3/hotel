@@ -3,12 +3,8 @@
 namespace App\Modules\WithdrawalMethods\Controllers;
 
 use App\Http\Controllers\AppBaseController;
-use App\Modules\Packages\Requests\PackageRequest;
-use App\Modules\Rooms\Repositories\RoomRepository;
-use App\Modules\Rooms\Requests\RoomRequest;
 use App\Modules\WithdrawalMethods\Repositories\WithdrawalMethodRepository;
 use App\Modules\WithdrawalMethods\Requests\WithdrawalMethodRequest;
-use GuzzleHttp\Psr7\Request;
 
 class WithdrawalMethodController extends AppBaseController
 {
@@ -19,46 +15,38 @@ class WithdrawalMethodController extends AppBaseController
         $this->withdrawalMethodRepository = $withdrawalMethodRepo;
     }
     // Fetch all data
-    public function index(withdrawalMethodRequest $request)
+    public function index(WithdrawalMethodRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
-        $floorId = $request->floor_id;
 
-        $checkExist = $this->withdrawalMethodRepository->checkExist($userId, $hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->withdrawalMethodRepository->all($userId, $hotelId, $floorId);
+        $data = $this->withdrawalMethodRepository->all($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Store data
-    public function store(withdrawalMethodRequest $request)
+    public function store(WithdrawalMethodRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
-        $floorId = $request->floor_id;
-        $roomNo = $request->room_no;
 
-        $checkExist = $this->withdrawalMethodRepository->checkExist($userId, $hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkNameExist = $this->withdrawalMethodRepository->checkNameExist($userId, $hotelId, $floorId, $roomNo);
-        if ($checkNameExist) {
-            return $this->sendError('Room no already exist.', 409);
+        $checkAlreadyAdded = $this->withdrawalMethodRepository->checkAlreadyAdded($hotelId);
+        if ($checkAlreadyAdded) {
+            return $this->sendError('You can not add more than one withdrawal method.', 409);
         }
 
-        $checkBookingPercentage = $this->withdrawalMethodRepository->checkBookingPercentage($userId, $hotelId);
-        if (!$checkBookingPercentage) {
-            return $this->sendError('Please add booking percentage.', 400);
-        }
-
-        $store = $this->withdrawalMethodRepository->store($request->all(), $userId);
+        $store = $this->withdrawalMethodRepository->store($request->all(), $user?->id);
         if (!$store) {
-            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+            return $this->sendError('Something went wrong!!! [WMC-01]', 500);
         }
         return $this->sendResponse($store, 'Data created successfully!');
     }
@@ -73,29 +61,27 @@ class WithdrawalMethodController extends AppBaseController
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Update data
-    public function update(withdrawalMethodRequest $request, $id)
+    public function update(WithdrawalMethodRequest $request, $id)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
-        $floorId = $request->floor_id;
-        $roomNo = $request->room_no;
+
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
 
         $data = $this->withdrawalMethodRepository->find($id);
         if (!$data) {
-            return $this->sendError('Data not found');
+            return $this->sendError('Data not found.');
         }
 
-        $checkNameExist = $this->withdrawalMethodRepository->checkNameUpdateExist($data->id, $userId, $hotelId,$floorId,$roomNo);
-        if ($checkNameExist) {
-            return $this->sendError('Room no already exist.', 404);
-        }
-
-        $updated = $this->withdrawalMethodRepository->update($data, $request->all(), $userId);
+        $updated = $this->withdrawalMethodRepository->update($data, $request->all(), $user?->id);
         if (!$updated) {
-            return $this->sendError('Something went wrong!!! [PC-02]', 500);
+            return $this->sendError('Something went wrong!!! [WMC-02]', 500);
         }
 
-        return $this->sendResponse($id, 'Data updated successfully!');
+        return $this->sendResponse($updated, 'Data updated successfully!');
     }
     // Delete data
     public function destroy($id)
