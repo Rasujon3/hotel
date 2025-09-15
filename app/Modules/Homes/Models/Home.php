@@ -46,6 +46,8 @@ class Home extends Model
         return [
             'hotel_id' => 'required|exists:hotels,id',
             'floor_id' => 'required|exists:floors,id',
+            'booking_start_date' => ['required', 'date', 'after_or_equal:today'],
+            'booking_end_date'   => ['required', 'date', 'after:booking_start_date'],
         ];
     }
     public static function listRules()

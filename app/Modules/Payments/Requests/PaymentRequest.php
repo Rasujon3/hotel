@@ -4,6 +4,7 @@ namespace App\Modules\Payments\Requests;
 
 use App\Modules\Areas\Models\Area;
 use App\Modules\Packages\Models\Package;
+use App\Modules\Payments\Models\Payment;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -48,8 +49,16 @@ class PaymentRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'rooms.list') {
-            return Room::listRules();
+        if ($routeName === 'payments.due-list') {
+            return Payment::dueListRules();
+        }
+
+        if ($routeName === 'payments.due-search') {
+            return Payment::dueSearchRules();
+        }
+
+        if ($routeName === 'payments.collect-due') {
+            return Payment::collectDueRules();
         }
 
         if ($routeName === 'rooms.update') {

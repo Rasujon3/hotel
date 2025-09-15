@@ -2,8 +2,11 @@
 
 namespace App\Modules\Bookings\Repositories;
 
+use App\Modules\Bookings\Models\Booking;
+use App\Modules\Bookings\Models\BookingDetail;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Payments\Models\Payment;
 use App\Modules\Rooms\Models\Room;
 use App\Modules\Rooms\Models\RoomImg;
 use App\Services\S3Service;
@@ -22,56 +25,61 @@ class BookingRepository
 
         return $data;
     }
-    public function store(array $data, $userId)
+    public function store(array $data, $userId, $hotelId)
     {
         DB::beginTransaction();
         try {
-            $rent = $data['rent'];
-            $hotelId = $data['hotel_id'];
-            $floorId = $data['floor_id'];
-            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
+            // 1. Create booking
+            $booking = Booking::create([
+                'user_id' => $userId,
+                'hotel_id' => $hotelId,
+                'booking_start_date' => $data['booking_start_date'],
+                'booking_end_date' => $data['booking_end_date'],
+                'check_in' => $data['check_in'] ?? null,
+                'check_out' => $data['check_out'] ?? null,
+                'total' => $data['total'],
+                'paid' => $data['paid'],
+                'due' => $data['total'] - $data['paid'],
+                'status' => 'confirmed',
+            ]);
 
-            $data['user_id'] = $userId;
-            $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
-
-            // icon
-            $data['icon'] = null;
-            $iconUrl = getBedIcon($data['bed_type'], $data['num_of_beds']);
-            if ($iconUrl) {
-                $data['icon'] = $iconUrl;
-            }
-
-            // Create the data record in the database
-            $created = Room::create($data);
-
-            // img upload
-            if (!empty($data['images'])) {
-                $s3 = app(S3Service::class);
-                foreach ($data['images'] as $file) {
-                    $image_url = null;
-                    $image_path = null;
-
-                    $result = $s3->upload($file, 'room');
-
-                    if ($result) {
-                        $image_url = $result['url'];
-                        $image_path = $result['path'];
-                    }
-
-                    RoomImg::create([
-                        'user_id' => $userId,
-                        'hotel_id' => $hotelId,
-                        'floor_id' => $floorId,
-                        'room_id' => $created->id,
-                        'image_url'  => $image_url,
-                        'image_path' => $image_path,
+            // 2. Add booking details (multiple rooms)
+            foreach ($data['rooms'] as $room) {
+                // 1️⃣ Store booking details
+                BookingDetail::create([
+                    'booking_id' => $booking->id,
+                    'user_id' => $userId,
+                    'hotel_id' => $room['hotel_id'],
+                    'floor_id' => $room['floor_id'] ?? null,
+                    'room_id' => $room['room_id'],
+                    'booking_start_date' => $data['booking_start_date'],
+                    'booking_end_date' => $data['booking_end_date'],
+                ]);
+                // 2️⃣ Update the corresponding room status and booking times
+                Room::where('id', $room['room_id'])
+                    ->update([
+                        'start_booking_time' => $data['booking_start_date'],
+                        'end_booking_time'   => $data['booking_end_date'],
+                        'current_status'     => 'booked',
                     ]);
-                }
             }
+
+            // 3. Save payment
+            Payment::create([
+                'booking_id' => $booking->id,
+                'payment_type' => $data['payment']['payment_type'],
+                'payment_method' => $data['payment']['payment_method'],
+                'acc_no' => $data['payment']['acc_no'] ?? null,
+                'amount' => $data['payment']['amount'],
+                'pay_type' => 'booking',
+                'transaction_id' => $data['payment']['transaction_id'],
+                'reference' => $data['payment']['reference'] ?? null,
+                'created_by' => $userId,
+            ]);
 
             DB::commit();
+            return $booking;
 
-            return $created;
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -120,7 +128,7 @@ class BookingRepository
                     }
                 }
 
-                $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
+                $hotelId = $data['hotel_id'] ?? $room->hotel_id;
                 if (!empty($data['images'])) {
                     foreach ($data['images'] as $file) {
                         $image_url = null;
@@ -239,5 +247,127 @@ class BookingRepository
             ->value('booking_percentage');
 
         return $checkBookingPercentage;
+    }
+    public function checkRoomExists($hotelId, $floorId, $roomId): array
+    {
+        $exists = Room::where('hotel_id', $hotelId)
+            ->where('floor_id', $floorId)
+            ->where('id', $roomId)
+            ->where('status', 'Active')
+            ->exists();
+
+        return $exists
+            ? ['status' => true]
+            : ['status' => false, 'message' => 'Room not found for the selected hotel and floor.'];
+    }
+    public function checkRoomAvailability($roomId): array
+    {
+        $room = Room::find($roomId);
+
+        if (!$room) {
+            return ['status' => false, 'message' => 'Room does not exist.'];
+        }
+
+        if ($room->current_status !== 'available') {
+            return ['status' => false, 'message' => "Room {$room->room_no} is currently {$room->current_status}."];
+        }
+
+        return ['status' => true];
+    }
+    public function checkAllRoomsSameHotel(array $rooms): array
+    {
+        $hotelIds = array_column($rooms, 'hotel_id');
+        $uniqueHotels = array_unique($hotelIds);
+
+        return count($uniqueHotels) === 1
+            ? ['status' => true]
+            : ['status' => false, 'message' => 'All selected rooms must belong to the same hotel.'];
+    }
+    public function checkBookingStatusAlreadyCheckedIn($bookingId)
+    {
+        $checkValid = Booking::where('id', $bookingId)
+            ->where('check_in', '!=', null)
+            ->where('status', '!=', 'confirmed')
+            ->exists();
+        return $checkValid;
+    }
+    public function checkBookingStatusAlreadyCheckedOut($bookingId)
+    {
+        $checkValid = Booking::where('id', $bookingId)
+            ->where('check_out', '!=', null)
+            ->where('status', '!=', 'checked_in')
+            ->exists();
+        return $checkValid;
+    }
+    public function checkDue($bookingId)
+    {
+        $checkValid = Booking::where('id', $bookingId)
+            ->where('due', '>', 0)
+            ->exists();
+        return $checkValid;
+    }
+    public function checkedInStatusUpdate(array $data, $userId, $bookingId)
+    {
+        try {
+            $booking = Booking::where('id', $bookingId)->first();
+            $booking->check_in = now();
+            $booking->status = 'checked_in';
+            $booking->update();
+
+            return $booking;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in checkedInStatusUpdate data: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return null;
+        }
+    }
+    public function checkedOutStatusUpdate(array $data, $userId, $bookingId)
+    {
+        DB::beginTransaction();
+        try {
+            // ✅ 1. Update booking status
+            $booking = Booking::where('id', $bookingId)->first();
+            $booking->check_out = now();
+            $booking->status = 'checked_out';
+            $booking->update();
+
+            // ✅ 2. Get all booked rooms for this booking
+            $roomIds = BookingDetail::where('booking_id', $bookingId)->pluck('room_id');
+
+            if ($roomIds->isNotEmpty()) {
+                // ✅ 3. Update Rooms table: make them available
+                Room::whereIn('id', $roomIds)->update([
+                    'start_booking_time' => null,
+                    'end_booking_time'   => null,
+                    'current_status'     => 'available',
+                    'updated_at'         => now(),
+                ]);
+            }
+
+            DB::commit();
+            return $booking;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in checkedOutStatusUpdate data: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return null;
+        }
     }
 }

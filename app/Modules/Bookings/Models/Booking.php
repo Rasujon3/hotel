@@ -21,6 +21,7 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
+        'hotel_id',
         'booking_detail_id',
         'booking_start_date',
         'booking_end_date',
@@ -47,18 +48,30 @@ class Booking extends Model
     public static function rules($id = null)
     {
         return [
-            'user_id' => 'required|exists:users,id',
-            'hotel_id' => 'required|exists:hotels,id',
-            'floor_id' => 'required||exists:floors,id',
-            'room_id' => 'required|exists:rooms,id',
-            'booking_start_date' => 'required|date|before:booking_end_date',
-            'booking_end_date' => 'required|date|after:booking_start_date',
-            'check_in' => 'nullable|date|after_or_equal:booking_start_date',
-            'check_out' => 'nullable|date|after:check_in',
-            'total' => 'required|numeric|min:1',
-            'paid' => 'nullable|numeric|min:0',
-            'due' => 'nullable|numeric|min:0',
-            'status' => 'nullable|in:pending,confirmed,checked_in,checked_out,cancelled',
+            // Booking main fields
+            'hotel_id'           => ['required', 'integer', 'exists:hotels,id'],
+            'booking_start_date' => ['required', 'date', 'after_or_equal:today'],
+            'booking_end_date'   => ['required', 'date', 'after:booking_start_date'],
+            'check_in'           => ['nullable', 'date'],
+            'check_out'          => ['nullable', 'date', 'after_or_equal:check_in'],
+            'total'              => ['required', 'numeric', 'min:1'],
+            'paid'               => ['required', 'numeric', 'min:1', 'lte:total'],
+            'due'                => ['required', 'numeric', 'min:0', 'lte:total'],
+
+            // Rooms array
+            'rooms'              => ['required', 'array', 'min:1'],
+            'rooms.*.hotel_id'   => ['required', 'integer', 'exists:hotels,id'],
+            'rooms.*.floor_id'   => ['nullable', 'integer', 'exists:floors,id'],
+            'rooms.*.room_id'    => ['required', 'integer', 'exists:rooms,id'],
+
+            // Payment fields
+            'payment'                     => ['required', 'array'],
+            'payment.payment_type'        => ['required', 'in:Online,Offline'],
+            'payment.payment_method'      => ['required', 'in:bkash,rocket,nagad,credit_card,cash,bank_transfer,other'],
+            'payment.acc_no'              => ['nullable', 'string', 'max:100'],
+            'payment.amount'              => ['required', 'numeric', 'min:0'],
+            'payment.transaction_id'      => ['required_if:payment.payment_type,Online', 'string', 'max:255'],
+            'payment.reference'           => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -87,6 +100,19 @@ class Booking extends Model
             'system_commission' => 'nullable|numeric|min:1|max:99999999.99',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ];
+    }
+    public static function updateStatusRules($id = null)
+    {
+        return [
+            'booking_id' => 'required|exists:bookings,id',
+            'status' => 'required|in:checked_in,checked_out',
+        ];
+    }
+    public static function updateCheckInStatusRules($id = null)
+    {
+        return [
+            'booking_id'     => 'required|exists:bookings,id',
         ];
     }
 

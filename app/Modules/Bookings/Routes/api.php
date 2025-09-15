@@ -8,5 +8,8 @@ Route::prefix('v1/bookings')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/create', [BookingController::class, 'store'])->name('bookings.store'); // Create data
     Route::get('/view/{room}', [BookingController::class, 'show'])->name('bookings.view'); // View data
     Route::post('/update/{room}', [BookingController::class, 'update'])->name('bookings.update'); // Update data
+    Route::post('/update-status', [BookingController::class, 'updateStatus'])->name('bookings.update-status');
+    Route::post('/update-check-in-status', [BookingController::class, 'updateCheckInStatus'])->name('bookings.update-check-in-status');
+    Route::post('/update-check-out-status', [BookingController::class, 'updateCheckOutStatus'])->name('bookings.update-check-out-status');
     Route::delete('/delete/{room}', [BookingController::class, 'destroy'])->name('bookings.delete'); // Delete data
 });

@@ -3,6 +3,7 @@
 namespace App\Modules\Bookings\Requests;
 
 use App\Modules\Areas\Models\Area;
+use App\Modules\Bookings\Models\Booking;
 use App\Modules\Packages\Models\Package;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Foundation\Http\FormRequest;
@@ -49,14 +50,26 @@ class BookingRequest extends FormRequest
         */
 
         if ($routeName === 'rooms.list') {
-            return Room::listRules();
+            return Booking::listRules();
         }
 
         if ($routeName === 'rooms.update') {
-            return Room::updateRules();
+            return Booking::updateRules();
         }
 
-        $id = $this->route('room') ?: null;
-        return Room::rules($id);
+        if ($routeName === 'bookings.update-status') {
+            return Booking::updateStatusRules();
+        }
+
+        if ($routeName === 'bookings.update-check-in-status') {
+            return Booking::updateCheckInStatusRules();
+        }
+
+        if ($routeName === 'bookings.update-check-out-status') {
+            return Booking::updateCheckInStatusRules();
+        }
+
+        $id = $this->route('booking') ?: null;
+        return Booking::rules($id);
     }
 }

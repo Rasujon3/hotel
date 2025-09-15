@@ -2,8 +2,10 @@
 
 namespace App\Modules\Payments\Repositories;
 
+use App\Modules\Bookings\Models\Booking;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Payments\Models\Payment;
 use App\Modules\Rooms\Models\Room;
 use App\Modules\Rooms\Models\RoomImg;
 use App\Services\S3Service;
@@ -13,14 +15,79 @@ use Exception;
 
 class PaymentRepository
 {
-    public function all($userId, $hotelId, $floorId)
+    public function dueList($hotelId)
     {
-        $data = Room::with('images','hotel', 'floor')
+        $data = Booking::with('user')
             ->where('hotel_id', $hotelId)
-            ->where('floor_id', $floorId)
+            ->where('due', '>=', 0)
             ->get();
 
         return $data;
+    }
+    public function dueSearch($hotelId, $phone)
+    {
+        $data = Booking::with('user')
+            ->where('hotel_id', $hotelId)
+            ->where('due', '>', 0)
+            ->whereHas('user', function ($query) use ($phone) {
+                $query->where('phone', $phone);
+            })
+            ->first();
+
+        return $data;
+    }
+    public function collectDue($bookingId, $hotelId, $userId, $amount)
+    {
+        DB::beginTransaction();
+        try {
+            // 1. booking amount update
+            $booking = Booking::where('id', $bookingId)
+                ->where('user_id', $userId)
+                ->where('hotel_id', $hotelId)
+                ->first();
+
+            $calculateDue = $booking->due - $amount;
+            $due = $calculateDue < 0 ? 0 : $calculateDue;
+            $paid = $booking->paid + $amount;
+
+            $booking->update([
+                'due' => $due,
+                'paid' => $paid,
+            ]);
+
+            // 2. Save payment
+            Payment::create([
+                'booking_id' => $bookingId,
+                'payment_type' => 'Offline',
+                'payment_method' => 'cash',
+                'acc_no' => null,
+                'amount' => $amount,
+                'pay_type' => 'additional',
+                'transaction_id' => null,
+                'reference' => null,
+                'created_by' => $userId,
+            ]);
+
+
+            DB::commit();
+            $message1 = "You Collected BDT {$amount} By Cash";
+            $message2 = "Less Amount BDT {$due}";
+            $message3 = ".";
+            $message = $message1 . $due > 0 ? $message2 : $message3;
+            return $booking;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in collectDue data: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return null;
+        }
     }
     public function store(array $data, $userId)
     {
@@ -206,12 +273,21 @@ class PaymentRepository
     {
         return Room::with('images','hotel', 'floor')->find($id);
     }
-    public function checkExist($userId, $hotelId, $floorId)
+    public function checkExist($hotelId)
     {
-        $checkValid = Floor::where('hotel_id', $hotelId)
-            ->where('id', $floorId)
+        $checkValid = Hotel::where('id', $hotelId)
+            ->where('status', 'Active')
             ->exists();
         return $checkValid;
+    }
+    public function checkDueZero($bookingId, $hotelId, $userId)
+    {
+        $checkDueZero = Booking::where('id', $bookingId)
+            ->where('user_id', $userId)
+            ->where('hotel_id', $hotelId)
+            ->where('due', '<=', 0)
+            ->exists();
+        return $checkDueZero;
     }
     public function checkNameExist($userId, $hotelId, $floorId, $roomNo)
     {

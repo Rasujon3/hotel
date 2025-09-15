@@ -87,17 +87,36 @@ class HomeRepository
             return 'No Rating';
         }
     }
-    public function roomDetails($hotelId, $floorId)
+    public function roomDetails($hotelId, $floorId, $bookingStartDate = null, $bookingEndDate = null)
     {
+        // Count available rooms considering date range
         $availableRooms = Room::where('hotel_id', $hotelId)
-            ->where('current_status', 'available')
+            ->where('status', 'Active')
+            ->where(function ($query) use ($bookingStartDate, $bookingEndDate) {
+                $query->whereNull('start_booking_time')
+                    ->orWhere(function ($q) use ($bookingStartDate, $bookingEndDate) {
+                        $q->where(function ($sub) use ($bookingStartDate, $bookingEndDate) {
+                            $sub->where('end_booking_time', '<=', $bookingStartDate); // booking ends before new booking starts
+                            #->orWhere('start_booking_time', '>', $bookingEndDate); // booking starts after new booking ends
+                        });
+                    });
+            })
             ->count();
 
-        $data =  Room::with('floor', 'images', 'hotel')
+        // Fetch available room data
+        $data = Room::with('floor', 'images', 'hotel')
             ->where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->where('status', 'Active')
-            ->where('current_status', 'available')
+            ->where(function ($query) use ($bookingStartDate, $bookingEndDate) {
+                $query->whereNull('start_booking_time')
+                    ->orWhere(function ($q) use ($bookingStartDate, $bookingEndDate) {
+                        $q->where(function ($sub) use ($bookingStartDate, $bookingEndDate) {
+                            $sub->where('end_booking_time', '<=', $bookingStartDate); // booking ends before new booking starts
+                                #->orWhere('start_booking_time', '>', $bookingEndDate);
+                        });
+                    });
+            })
             ->get();
 
         return [

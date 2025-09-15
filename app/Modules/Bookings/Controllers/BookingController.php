@@ -37,29 +37,41 @@ class BookingController extends AppBaseController
     public function store(BookingRequest $request)
     {
         $userId = getUser()?->id;
-        $hotelId = $request->hotel_id;
-        $floorId = $request->floor_id;
-        $roomNo = $request->room_no;
 
-        $checkExist = $this->bookingRepository->checkExist($userId, $hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        $rooms = $request->rooms; // array of selected rooms
+
+        // ✅ 1. Check all rooms are from the same hotel
+        $sameHotelCheck = $this->bookingRepository->checkAllRoomsSameHotel($rooms);
+        if (!$sameHotelCheck['status']) {
+            return $this->sendError($sameHotelCheck['message'], 422);
         }
 
-        $checkNameExist = $this->bookingRepository->checkNameExist($userId, $hotelId, $floorId, $roomNo);
-        if ($checkNameExist) {
-            return $this->sendError('Room no already exist.', 409);
+        // ✅ 2. Loop through each room to validate existence and availability
+        $hotelId = null;
+        foreach ($rooms as $room) {
+            $hotelId = $room['hotel_id'];
+            $existCheck = $this->bookingRepository->checkRoomExists(
+                $room['hotel_id'],
+                $room['floor_id'],
+                $room['room_id']
+            );
+            if (!$existCheck['status']) {
+                return $this->sendError($existCheck['message'], 404);
+            }
+
+            $availabilityCheck = $this->bookingRepository->checkRoomAvailability($room['room_id']);
+            if (!$availabilityCheck['status']) {
+                return $this->sendError($availabilityCheck['message'], 409);
+            }
         }
 
-        $checkBookingPercentage = $this->bookingRepository->checkBookingPercentage($userId, $hotelId);
-        if (!$checkBookingPercentage) {
-            return $this->sendError('Please add booking percentage.', 400);
-        }
+        // ✅ 3. If all checks pass, continue storing booking
+        $store = $this->bookingRepository->store($request->all(), $userId, $hotelId);
 
-        $store = $this->bookingRepository->store($request->all(), $userId);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
         }
+
         return $this->sendResponse($store, 'Data created successfully!');
     }
     // Get single details data
@@ -106,5 +118,61 @@ class BookingController extends AppBaseController
         }
         $this->bookingRepository->delete($data);
         return $this->sendSuccess('Data deleted successfully!');
+    }
+    public function updateStatus(BookingRequest $request)
+    {
+        $status = $request->status;
+
+        return $status === 'checked_in'
+            ? $this->updateCheckInStatus($request)
+            : $this->updateCheckOutStatus($request);
+    }
+    public function updateCheckInStatus(BookingRequest $request)
+    {
+        $userId = getUser()?->id;
+
+        $bookingId = $request->booking_id; // array of selected rooms
+
+        // ✅ 1. Check Booking Status Already Checked-In
+        $checkBookingStatusAlreadyCheckedIn = $this->bookingRepository->checkBookingStatusAlreadyCheckedIn($bookingId);
+        if ($checkBookingStatusAlreadyCheckedIn) {
+            return $this->sendError('Booking already checked in.', 409);
+        }
+
+        // ✅ 3. If all checks pass, continue storing booking
+        $store = $this->bookingRepository->checkedInStatusUpdate($request->all(), $userId, $bookingId);
+
+        if (!$store) {
+            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+        }
+
+        return $this->sendResponse($store, 'Checked-In status updated successfully!');
+    }
+    public function updateCheckOutStatus(BookingRequest $request)
+    {
+        $userId = getUser()?->id;
+
+        $bookingId = $request->booking_id; // array of selected rooms
+
+        // ✅ 1. Check Booking Status Already Checked-In
+        $checkBookingStatusAlreadyCheckedOut = $this->bookingRepository->checkBookingStatusAlreadyCheckedOut($bookingId);
+        if ($checkBookingStatusAlreadyCheckedOut) {
+            return $this->sendError('Booking already checked out.', 409);
+        }
+
+        // ✅ 2. Check have any due amount
+        $checkDue = $this->bookingRepository->checkDue($bookingId);
+        if ($checkDue) {
+            return $this->sendError('Please collect due amount.', 409);
+        }
+
+        // ✅ 3. If all checks pass, continue storing booking
+        $store = $this->bookingRepository->checkedOutStatusUpdate($request->all(), $userId, $bookingId);
+
+        if (!$store) {
+            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+        }
+
+        return $this->sendResponse($store, 'Checked-Out status updated successfully!');
     }
 }

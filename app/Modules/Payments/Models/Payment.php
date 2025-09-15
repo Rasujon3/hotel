@@ -23,6 +23,7 @@ class Payment extends Model
         'booking_id',
         'payment_type',
         'payment_method',
+        'acc_no',
         'amount',
         'pay_type',
         'transaction_id',
@@ -55,11 +56,28 @@ class Payment extends Model
         ];
     }
 
-    public static function listRules($id = null)
+    public static function dueListRules($id = null)
     {
         return [
             'hotel_id'    => 'required|exists:hotels,id',
-            'floor_id'    => 'required|exists:floors,id',
+        ];
+    }
+
+    public static function dueSearchRules($id = null)
+    {
+        return [
+            'hotel_id'    => 'required|exists:hotels,id',
+            'phone'    => 'required|exists:users,phone',
+        ];
+    }
+
+    public static function collectDueRules($id = null)
+    {
+        return [
+            'user_id' => 'required|exists:users,id',
+            'hotel_id' => 'required|exists:hotels,id',
+            'booking_id' => 'required|exists:bookings,id',
+            'amount' => 'required|numeric|min:1|max:99999999.99',
         ];
     }
 
@@ -87,11 +105,11 @@ class Payment extends Model
     {
         return $this->belongsTo(Booking::class,'booking_id');
     }
-    public function created() : belongsTo
+    public function createdBy() : belongsTo
     {
         return $this->belongsTo(User::class,'created_by');
     }
-    public function updated() : belongsTo
+    public function updatedBy() : belongsTo
     {
         return $this->belongsTo(User::class,'updated_by');
     }
