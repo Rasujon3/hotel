@@ -70,7 +70,9 @@ class Hotel extends Model
     public static function checkBalanceRules()
     {
         return [
-            'hotel_id'    => 'nullable|exists:hotels,id',
+            'hotel_id'   => ['required', 'integer', 'exists:hotels,id'],
+            'start_date' => ['nullable', 'date', 'before_or_equal:end_date', 'required_with:end_date'],
+            'end_date'   => ['nullable', 'date', 'after_or_equal:start_date', 'required_with:start_date'],
         ];
     }
     public function user() : belongsTo

@@ -30,17 +30,59 @@ class HotelRepository
 
         return $data;
     }
-    public function revenueTracker($hotelId)
+    public function revenueTracker($hotelId, $startDate, $endDate)
     {
-        $income = Booking::where('hotel_id', $hotelId)->sum('paid');
-        $expense = Expense::where('hotel_id', $hotelId)->sum('amount');
-        $earn = $income - $expense;
+        try {
+            $income = 0;
+            $expense = 0;
+            if ($startDate && $endDate) {
+                // ✅ Normalize to full-day range
+                $startDateTime = Carbon::parse($startDate)->startOfDay();
+                $endDateTime   = Carbon::parse($endDate)->endOfDay();
 
-        return [
-            'income' => $income,
-            'expense' => $expense,
-            'earn' => $earn
-        ];
+                // ✅ Sum bookings where the booking period overlaps the selected range
+                $income = Booking::where('hotel_id', $hotelId)
+                    ->where(function ($query) use ($startDate, $endDate) {
+//                    ->where(function ($query) use ($startDateTime, $endDateTime) {
+                        $query->whereBetween('booking_start_date', [$startDate, $endDate])
+                            ->orWhereBetween('booking_end_date', [$startDate, $endDate]);
+//                        $query->whereBetween('booking_start_date', [$startDateTime, $endDateTime])
+//                            ->orWhereBetween('booking_end_date', [$startDateTime, $endDateTime]);
+                    })
+                    ->sum('paid');
+                // ✅ Filter expenses within the same date range (if you also want date-filtered expenses)
+                $expense = Expense::where('hotel_id', $hotelId)
+                    ->whereBetween('updated_at', [$startDate, $endDate])
+                    ->sum('amount');
+            } else {
+                $income = Booking::where('hotel_id', $hotelId)->sum('paid');
+                $expense = Expense::where('hotel_id', $hotelId)->sum('amount');
+            }
+
+            $earn = $income - $expense;
+
+            return [
+                'income' => $income,
+                'expense' => $expense,
+                'earn' => $earn
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in revenueTracker data: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'income' => 0,
+                'expense' => 0,
+                'earn' => 0
+            ];
+        }
     }
     public function checkBalance($hotelId)
     {

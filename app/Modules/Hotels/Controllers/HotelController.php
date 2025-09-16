@@ -113,12 +113,14 @@ class HotelController extends AppBaseController
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
 
         if (!in_array($hotelId, $userHotelIds,false)) {
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->hotelRepository->revenueTracker($hotelId);
+        $data = $this->hotelRepository->revenueTracker($hotelId, $startDate, $endDate);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 }
