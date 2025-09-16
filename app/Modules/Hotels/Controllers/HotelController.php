@@ -96,7 +96,6 @@ class HotelController extends AppBaseController
 
         return $this->sendResponse($updated, 'Data updated successfully!');
     }
-
     // Delete data
     public function destroy($id)
     {
@@ -108,5 +107,18 @@ class HotelController extends AppBaseController
         }
         $this->floorRepository->delete($data);
         return $this->sendSuccess('Data deleted successfully!');
+    }
+    public function revenueTracker(HotelRequest $request)
+    {
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        $hotelId = $request->hotel_id;
+
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
+        $data = $this->hotelRepository->revenueTracker($hotelId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 }

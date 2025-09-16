@@ -53,6 +53,10 @@ class HotelRequest extends FormRequest
         if ($routeName === 'hotels.check-balance') {
             return Hotel::checkBalanceRules();
         }
+
+        if ($routeName === 'hotels.revenue-tracker') {
+            return Hotel::checkBalanceRules();
+        }
         $id = $this->route('hotel') ?: null;
         return Hotel::rules($id);
     }

@@ -4,6 +4,8 @@ namespace App\Modules\Hotels\Repositories;
 
 
 use App\Models\User;
+use App\Modules\Bookings\Models\Booking;
+use App\Modules\Expenses\Models\Expense;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
 use App\Modules\Receptionists\Models\Receptionist;
@@ -27,6 +29,18 @@ class HotelRepository
         }
 
         return $data;
+    }
+    public function revenueTracker($hotelId)
+    {
+        $income = Booking::where('hotel_id', $hotelId)->sum('paid');
+        $expense = Expense::where('hotel_id', $hotelId)->sum('amount');
+        $earn = $income - $expense;
+
+        return [
+            'income' => $income,
+            'expense' => $expense,
+            'earn' => $earn
+        ];
     }
     public function checkBalance($hotelId)
     {

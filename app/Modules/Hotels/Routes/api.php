@@ -10,5 +10,6 @@ Route::prefix('v1/hotels')->middleware(['auth:sanctum', 'roles:owner,receptionis
     Route::post('/create', [HotelController::class, 'store'])->name('hotels.store'); // Create data
     Route::get('/view/{hotel}', [HotelController::class, 'show'])->name('hotels.view'); // View data
     Route::post('/update/{hotel}', [HotelController::class, 'update'])->name('hotels.update'); // Update data
+    Route::post('/revenue-tracker', [HotelController::class, 'revenueTracker'])->name('hotels.revenue-tracker'); // revenue-tracker data
     Route::delete('/delete/{hotel}', [HotelController::class, 'destroy'])->name('hotels.delete'); // Delete data
 });
