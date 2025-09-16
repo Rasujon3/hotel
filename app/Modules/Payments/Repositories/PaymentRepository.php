@@ -42,12 +42,12 @@ class PaymentRepository
         try {
             // 1. booking amount update
             $booking = Booking::where('id', $bookingId)
-                ->where('user_id', $userId)
+                #->where('user_id', $userId)
                 ->where('hotel_id', $hotelId)
                 ->first();
 
             $calculateDue = $booking->due - $amount;
-            $due = $calculateDue < 0 ? 0 : $calculateDue;
+            $due = $calculateDue <= 0 ? 0 : $calculateDue;
             $paid = $booking->paid + $amount;
 
             $booking->update([
@@ -70,11 +70,13 @@ class PaymentRepository
 
 
             DB::commit();
+            /*
             $message1 = "You Collected BDT {$amount} By Cash";
             $message2 = "Less Amount BDT {$due}";
             $message3 = ".";
             $message = $message1 . $due > 0 ? $message2 : $message3;
-            return $booking;
+            */
+            return $this->findBooking($booking->id);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -86,8 +88,15 @@ class PaymentRepository
                 'trace' => $e->getTraceAsString()
             ]);
 
+            return $e->getMessage();
             return null;
         }
+    }
+
+    public function findBooking($id)
+    {
+        $data = Booking::with('payments','hotel')->find($id);
+        return $data;
     }
     public function store(array $data, $userId)
     {

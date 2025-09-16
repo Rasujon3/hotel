@@ -74,7 +74,7 @@ class Payment extends Model
     public static function collectDueRules($id = null)
     {
         return [
-            'user_id' => 'required|exists:users,id',
+            #'user_id' => 'required|exists:users,id',
             'hotel_id' => 'required|exists:hotels,id',
             'booking_id' => 'required|exists:bookings,id',
             'amount' => 'required|numeric|min:1|max:99999999.99',

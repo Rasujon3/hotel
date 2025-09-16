@@ -64,6 +64,9 @@ class PaymentController extends AppBaseController
         }
 
         $data = $this->paymentRepository->collectDue($bookingId, $hotelId, $userId, $amount);
+        if (!$data) {
+            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+        }
         return $this->sendResponse($data, 'Collect due successfully.');
     }
     // Store data

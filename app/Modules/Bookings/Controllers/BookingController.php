@@ -59,7 +59,8 @@ class BookingController extends AppBaseController
                 return $this->sendError($existCheck['message'], 404);
             }
 
-            $availabilityCheck = $this->bookingRepository->checkRoomAvailability($room['room_id']);
+            $bookingStartDate = $request->booking_start_date;
+            $availabilityCheck = $this->bookingRepository->checkRoomAvailability($room['room_id'], $bookingStartDate);
             if (!$availabilityCheck['status']) {
                 return $this->sendError($availabilityCheck['message'], 409);
             }
@@ -143,7 +144,7 @@ class BookingController extends AppBaseController
         $store = $this->bookingRepository->checkedInStatusUpdate($request->all(), $userId, $bookingId);
 
         if (!$store) {
-            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+            return $this->sendError('Something went wrong!!! [BC-01]', 500);
         }
 
         return $this->sendResponse($store, 'Checked-In status updated successfully!');

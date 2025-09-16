@@ -265,7 +265,7 @@ class BookingRepository
             ? ['status' => true]
             : ['status' => false, 'message' => 'Room not found for the selected hotel and floor.'];
     }
-    public function checkRoomAvailability($roomId): array
+    public function checkRoomAvailability($roomId, $bookingStartDate): array
     {
         $room = Room::find($roomId);
 
@@ -273,7 +273,7 @@ class BookingRepository
             return ['status' => false, 'message' => 'Room does not exist.'];
         }
 
-        if ($room->current_status !== 'available') {
+        if ($room->end_booking_time > $bookingStartDate) {
             return ['status' => false, 'message' => "Room {$room->room_no} is currently {$room->current_status}."];
         }
 
@@ -340,22 +340,49 @@ class BookingRepository
         DB::beginTransaction();
         try {
             // ✅ 1. Update booking status
-            $booking = Booking::where('id', $bookingId)->first();
+            $booking = Booking::findOrFail($bookingId);
             $booking->check_out = now();
             $booking->status = 'checked_out';
-            $booking->update();
+            $booking->save();
 
-            // ✅ 2. Get all booked rooms for this booking
+            // ✅ 2. Get all booked room IDs for this booking
             $roomIds = BookingDetail::where('booking_id', $bookingId)->pluck('room_id');
 
             if ($roomIds->isNotEmpty()) {
-                // ✅ 3. Update Rooms table: make them available
-                Room::whereIn('id', $roomIds)->update([
-                    'start_booking_time' => null,
-                    'end_booking_time'   => null,
-                    'current_status'     => 'available',
-                    'updated_at'         => now(),
-                ]);
+                // ✅ 3. Loop through each room to check conditions
+                foreach ($roomIds as $roomId) {
+                    $room = Room::find($roomId);
+
+                    if (!$room) {
+                        continue;
+                    }
+
+                    $updateData = [];
+
+                    // ✅ Condition 1: If room.start_booking_time == booking.booking_start_date
+                    if ($room->start_booking_time == $booking->booking_start_date) {
+                        $updateData['start_booking_time'] = null;
+                    }
+
+                    // ✅ Condition 2: If room.end_booking_time == booking.booking_end_date
+                    if ($room->end_booking_time == $booking->booking_end_date) {
+                        $updateData['end_booking_time'] = null;
+                    }
+
+                    // ✅ Condition 3: If BOTH start & end match, set status = available
+                    if (
+                        $room->start_booking_time == $booking->booking_start_date &&
+                        $room->end_booking_time == $booking->booking_end_date
+                    ) {
+                        $updateData['current_status'] = 'available';
+                    }
+
+                    // ✅ Only update if there are changes
+                    if (!empty($updateData)) {
+                        $updateData['updated_at'] = now();
+                        $room->update($updateData);
+                    }
+                }
             }
 
             DB::commit();
@@ -364,12 +391,11 @@ class BookingRepository
         } catch (Exception $e) {
             DB::rollBack();
 
-            // Log the error
-            Log::error('Error in checkedOutStatusUpdate data: ' , [
+            Log::error('Error in checkedOutStatusUpdate:', [
                 'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'code'    => $e->getCode(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return null;
