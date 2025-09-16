@@ -60,6 +60,10 @@ class HomeRequest extends FormRequest
             return Home::roomDetailsRules();
         }
 
+        if ($routeName === 'homes.search-by-area') {
+            return Home::searchByAreaRules();
+        }
+
         /*
         if ($routeName === 'ratings.list') {
             return Rating::listRules();

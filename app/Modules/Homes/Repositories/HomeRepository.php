@@ -21,6 +21,28 @@ class HomeRepository
     {
         return Cache::remember('popular_hotels', now()->addMinutes(10), fn() => $this->getPopularHotelsData());
     }
+    public function searchByArea($range, $userLat, $userLong)
+    {
+        $rangeInKm = $range / 1000;
+
+        $data = Hotel::with('images')
+            ->select('*')
+            ->selectRaw("
+            (6371 * acos(
+                cos(radians(?)) *
+                cos(radians(lat)) *
+                cos(radians(`long`) - radians(?)) +
+                sin(radians(?)) *
+                sin(radians(lat))
+            )) AS distance
+        ", [$userLat, $userLong, $userLat])
+            ->where('status', 'Active')
+            ->having('distance', '<=', $rangeInKm)
+            ->orderBy('distance', 'asc')
+            ->get();
+
+        return $data;
+    }
     public function propertyType()
     {
 //        return $this->getPropertyTypeData();

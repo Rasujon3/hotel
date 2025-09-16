@@ -56,6 +56,14 @@ class Home extends Model
             'user_id' => 'required|string|max:191|exists:users,id',
         ];
     }
+    public static function searchByAreaRules()
+    {
+        return [
+            'range' => 'required|numeric|min:1',
+            'lat'   => 'required|numeric|between:-90,90',
+            'long'  => 'required|numeric|between:-180,180',
+        ];
+    }
     public function user() : belongsTo
     {
         return $this->belongsTo(User::class,'user_id');

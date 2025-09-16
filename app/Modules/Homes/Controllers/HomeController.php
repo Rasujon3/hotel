@@ -28,6 +28,15 @@ class HomeController extends AppBaseController
         $data = $this->homeRepository->popularHotels();
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function searchByArea(HomeRequest $request)
+    {
+        $range = $request->range;
+        $userLat = $request->lat;
+        $userLong = $request->long;
+
+        $data = $this->homeRepository->searchByArea($range, $userLat, $userLong);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     public function propertyType()
     {
         $data = $this->homeRepository->propertyType();
