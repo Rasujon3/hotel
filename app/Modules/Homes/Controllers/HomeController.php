@@ -28,6 +28,11 @@ class HomeController extends AppBaseController
         $data = $this->homeRepository->popularHotels();
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function propertyType()
+    {
+        $data = $this->homeRepository->propertyType();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
 
     // Fetch all data
     public function hotelDetails(HomeRequest $request)

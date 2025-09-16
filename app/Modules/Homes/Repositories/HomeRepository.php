@@ -21,6 +21,11 @@ class HomeRepository
     {
         return Cache::remember('popular_hotels', now()->addMinutes(10), fn() => $this->getPopularHotelsData());
     }
+    public function propertyType()
+    {
+//        return $this->getPropertyTypeData();
+        return Cache::remember('property_type', now()->addMinutes(10), fn() => $this->getPropertyTypeData());
+    }
     public function getPopularHotelsData()
     {
         $data =  Hotel::with('ratings')
@@ -38,6 +43,14 @@ class HomeRepository
                 ];
             });
         return $data;
+    }
+    public function getPropertyTypeData()
+    {
+        $hotelCount =  Hotel::where('status', 'Active')->count();
+        return [
+            'hotel_count' => $hotelCount,
+            'name' => 'Hotels'
+        ];
     }
     public function hotelDetails($hotelId)
     {
