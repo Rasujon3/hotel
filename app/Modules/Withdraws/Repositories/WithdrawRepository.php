@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\WithdrawalMethods\Repositories;
+namespace App\Modules\Withdraws\Repositories;
 
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
@@ -13,32 +13,30 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class WithdrawalMethodRepository
+class WithdrawRepository
 {
-    public function all($hotelId)
+    public function all()
     {
-        $data = WithdrawalMethod::with('hotel')
-            ->where('hotel_id', $hotelId)
-            ->get();
+        $data = Withdraw::with('hotel')->get();
 
         return $data;
     }
-    public function withdrawalHistory($hotelId)
-    {
-        $data = Withdraw::with('hotel')
-            ->where('hotel_id', $hotelId)
-            ->get();
-
-        return $data;
-    }
-    public function store(array $data, $userId)
+    public function store(array $data, $userId, $hotelId)
     {
         DB::beginTransaction();
         try {
             $data['user_id'] = $userId;
+            $withdrawalMethod = WithdrawalMethod::where('hotel_id', $hotelId)->first();
+            $data['title'] = $withdrawalMethod->payment_method . '_' . $withdrawalMethod->acc_no;
+            $data['withdrawal_method_id'] = $withdrawalMethod->id;
+            $data['created_by'] = $userId;
 
             // Create the data record in the database
-            $created = WithdrawalMethod::create($data);
+            $created = Withdraw::create($data);
+
+            $hotel = Hotel::where('id', $hotelId)->first();
+            $hotel->balance = $hotel->balance - $data['amount'];
+            $hotel->update();
 
             DB::commit();
 
@@ -57,15 +55,30 @@ class WithdrawalMethodRepository
             return null;
         }
     }
-    public function update(WithdrawalMethod $withdrawalMethod, array $data, $userId)
+    public function update(Withdraw $withdraw, array $data, $userId, $hotelId, $amount)
     {
         DB::beginTransaction();
         try {
+            $hotel = Hotel::where('id', $hotelId)->first();
+            $hotelBalance = $hotel->balance;
+            $hotelBalanceUpdate = $hotel->balance;
+
+            $prevAmount = $withdraw->amount;
+            $data['amount'] = $prevAmount;
+
+            if ($prevAmount != $amount) {
+                $hotelBalanceUpdate = ($hotelBalance + $prevAmount) - $amount;
+                $data['amount'] = $amount;
+            }
+
             // Perform the update
-            $withdrawalMethod->update($data);
+            $withdraw->update($data);
+
+            $hotel->balance = $hotelBalanceUpdate;
+            $hotel->update();
 
             DB::commit();
-            return $this->find($withdrawalMethod->id);
+            return $this->find($withdraw->id);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -80,12 +93,19 @@ class WithdrawalMethodRepository
             return null;
         }
     }
-    public function delete(WithdrawalMethod $withdrawalMethod)
+    public function delete(Withdraw $withdraw)
     {
         DB::beginTransaction();
         try {
+            // 1. Add amount to hotel balance
+            $hotel = Hotel::where('id', $withdraw->hotel_id)->first();
+            $prevAmount = $withdraw->amount;
+
+            $hotel->balance = $hotel->balance + $prevAmount;
+            $hotel->update();
+
             // 5. Finally, delete itself
-            $withdrawalMethod->delete();
+            $withdraw->delete();
 
             DB::commit();
             return true;
@@ -95,7 +115,7 @@ class WithdrawalMethodRepository
 
             // Log error
             Log::error('Error deleting data: ' , [
-                'id' => $withdrawalMethod->id,
+                'id' => $withdraw->id,
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'line' => $e->getLine(),
@@ -107,7 +127,7 @@ class WithdrawalMethodRepository
     }
     public function find($id)
     {
-        return WithdrawalMethod::with('hotel')->find($id);
+        return Withdraw::with('hotel')->find($id);
     }
     public function checkExist($userId, $hotelId, $floorId)
     {
@@ -139,5 +159,18 @@ class WithdrawalMethodRepository
             ->value('booking_percentage');
 
         return $checkBookingPercentage;
+    }
+    public function checkBalance($hotelId, $amount)
+    {
+        $hotelBalance = Hotel::where('id', $hotelId)->value('balance');
+        $status = $hotelBalance >= $amount;
+
+        return $status;
+    }
+    public function checkWithdrawalMethodExist($hotelId)
+    {
+        $check = WithdrawalMethod::where('hotel_id', $hotelId)->first();
+
+        return $check;
     }
 }

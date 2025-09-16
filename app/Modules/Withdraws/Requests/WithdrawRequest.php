@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Modules\WithdrawalMethods\Requests;
+namespace App\Modules\Withdraws\Requests;
 
 use App\Modules\Areas\Models\Area;
 use App\Modules\Packages\Models\Package;
 use App\Modules\Rooms\Models\Room;
 use App\Modules\WithdrawalMethods\Models\WithdrawalMethod;
+use App\Modules\Withdraws\Models\Withdraw;
 use Illuminate\Foundation\Http\FormRequest;
 
-class WithdrawalMethodRequest extends FormRequest
+class WithdrawRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -49,15 +50,11 @@ class WithdrawalMethodRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'withdrawalMethods.list') {
-            return WithdrawalMethod::listRules();
+        if ($routeName === 'withdraws.update') {
+            return Withdraw::updateRules();
         }
 
-        if ($routeName === 'withdrawalMethods.withdrawal-history') {
-            return WithdrawalMethod::listRules();
-        }
-
-        $id = $this->route('withdrawalMethod') ?: null;
-        return WithdrawalMethod::rules($id);
+        $id = $this->route('withdraws') ?: null;
+        return Withdraw::rules($id);
     }
 }

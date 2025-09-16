@@ -28,6 +28,19 @@ class WithdrawalMethodController extends AppBaseController
         $data = $this->withdrawalMethodRepository->all($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function withdrawalHistory(WithdrawalMethodRequest $request)
+    {
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        $hotelId = $request->hotel_id;
+
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
+        $data = $this->withdrawalMethodRepository->withdrawalHistory($hotelId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     // Store data
     public function store(WithdrawalMethodRequest $request)
     {
