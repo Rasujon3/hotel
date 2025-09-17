@@ -66,7 +66,7 @@ class PaymentController extends AppBaseController
             return $this->sendError('No due found.', 404);
         }
 
-        $data = $this->paymentRepository->collectDue($bookingId, $hotelId, $amount);
+        $data = $this->paymentRepository->collectDue($bookingId, $hotelId, $amount, $user?->id);
         if (!$data) {
             return $this->sendError('Something went wrong!!! [PC-01]', 500);
         }

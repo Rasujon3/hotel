@@ -36,7 +36,7 @@ class PaymentRepository
 
         return $data;
     }
-    public function collectDue($bookingId, $hotelId, $amount)
+    public function collectDue($bookingId, $hotelId, $amount, $userId)
     {
         DB::beginTransaction();
         try {
@@ -88,7 +88,7 @@ class PaymentRepository
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $e->getMessage();
+            # return $e->getMessage();
             return null;
         }
     }

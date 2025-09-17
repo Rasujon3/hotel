@@ -50,19 +50,27 @@ class Booking extends Model
         return [
             // Booking main fields
             'hotel_id'           => ['nullable', 'integer', 'exists:hotels,id'],
-            'booking_start_date' => ['required', 'date', 'after_or_equal:today'],
-            'booking_end_date'   => ['required', 'date', 'after:booking_start_date'],
-            'check_in'           => ['nullable', 'date'],
-            'check_out'          => ['nullable', 'date', 'after_or_equal:check_in'],
+//            'booking_start_date' => ['nullable', 'date', 'after_or_equal:today'],
+//            'booking_end_date'   => ['nullable', 'date', 'after:booking_start_date'],
+//            'check_in'           => ['nullable', 'date'],
+//            'check_out'          => ['nullable', 'date', 'after_or_equal:check_in'],
             'total'              => ['required', 'numeric', 'min:1'],
             'paid'               => ['required', 'numeric', 'min:1', 'lte:total'],
             'due'                => ['required', 'numeric', 'min:0', 'lte:total'],
 
             // Rooms array
-            'rooms'              => ['required', 'array', 'min:1'],
-            'rooms.*.hotel_id'   => ['required', 'integer', 'exists:hotels,id'],
-            'rooms.*.floor_id'   => ['nullable', 'integer', 'exists:floors,id'],
-            'rooms.*.room_id'    => ['required', 'integer', 'exists:rooms,id'],
+            'rooms'                        => ['required', 'array', 'min:1'],
+            'rooms.*.hotel_id'             => ['required', 'integer', 'exists:hotels,id'],
+            'rooms.*.floor_id'             => ['nullable', 'integer', 'exists:floors,id'],
+            'rooms.*.room_id'              => ['required', 'integer', 'exists:rooms,id'],
+
+            // Booking Dates
+            'rooms.*.booking_start_date'   => ['required', 'date', 'after_or_equal:today'],
+            'rooms.*.booking_end_date'     => ['required', 'date', 'after_or_equal:rooms.*.booking_start_date'],
+
+            // Optional Check-in/out
+            'rooms.*.check_in'             => ['nullable', 'date'],
+            'rooms.*.check_out'            => ['nullable', 'date', 'after_or_equal:rooms.*.check_in'],
 
             // Payment fields
             'payment'                     => ['required', 'array'],
@@ -106,7 +114,7 @@ class Booking extends Model
     {
         return [
             'hotel_id'    => 'required|exists:hotels,id',
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_detail_id' => 'required|exists:booking_details,id',
             'status' => 'required|in:checked_in,checked_out',
         ];
     }
@@ -114,6 +122,13 @@ class Booking extends Model
     {
         return [
             'booking_id'     => 'required|exists:bookings,id',
+        ];
+    }
+    public static function searchBookingByUserRules()
+    {
+        return [
+            'hotel_id'    => 'required|exists:hotels,id',
+            'phone'     => 'required|exists:users,phone',
         ];
     }
 
@@ -133,5 +148,9 @@ class Booking extends Model
     public function payments() : hasMany
     {
         return $this->hasMany(Payment::class,'booking_id');
+    }
+    public function bookingDetails() : hasMany
+    {
+        return $this->hasMany(BookingDetail::class,'booking_id');
     }
 }

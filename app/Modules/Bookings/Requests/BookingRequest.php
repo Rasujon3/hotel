@@ -69,6 +69,10 @@ class BookingRequest extends FormRequest
             return Booking::updateCheckInStatusRules();
         }
 
+        if ($routeName === 'bookings.search-booking-by-user') {
+            return Booking::searchBookingByUserRules();
+        }
+
         $id = $this->route('booking') ?: null;
         return Booking::rules($id);
     }

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Payments\Models\Payment;
+use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,9 @@ class BookingDetail extends Model
         'booking_end_date',
         'check_in',
         'check_out',
+        'rent',
+        'status',
+        'day_count',
     ];
 
     protected $hidden = [
@@ -54,6 +58,9 @@ class BookingDetail extends Model
             'booking_end_date' => 'required|date|after:booking_start_date',
             'check_in' => 'nullable|date|after_or_equal:booking_start_date',
             'check_out' => 'nullable|date|after:check_in',
+            'rent' => 'nullable|numeric|min:1|max:99999999.99',
+            'status' => 'nullable|in:pending, confirmed, checked_in, checked_out, cancelled',
+            'day_count' => 'nullable|integer|min:1|max:365',
         ];
     }
 
@@ -97,6 +104,14 @@ class BookingDetail extends Model
     public function floor() : belongsTo
     {
         return $this->belongsTo(Floor::class,'floor_id');
+    }
+    public function room() : belongsTo
+    {
+        return $this->belongsTo(Room::class,'room_id');
+    }
+    public function booking() : belongsTo
+    {
+        return $this->belongsTo(Booking::class,'booking_id');
     }
     public function payments() : hasMany
     {

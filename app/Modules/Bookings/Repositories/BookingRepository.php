@@ -2,6 +2,7 @@
 
 namespace App\Modules\Bookings\Repositories;
 
+use App\Models\User;
 use App\Modules\Bookings\Models\Booking;
 use App\Modules\Bookings\Models\BookingDetail;
 use App\Modules\Floors\Models\Floor;
@@ -25,6 +26,19 @@ class BookingRepository
 
         return $data;
     }
+    public function searchBookingByUser($phone)
+    {
+        $user = User::where('phone', $phone)->first();
+        $data = BookingDetail::with('room','hotel')
+            ->where('user_id', $user->id)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return [
+            'user' => $user,
+            'booking_details' => $data
+        ];
+    }
     public function store(array $data, $userId, $hotelId)
     {
         DB::beginTransaction();
@@ -33,14 +47,14 @@ class BookingRepository
             $booking = Booking::create([
                 'user_id' => $userId,
                 'hotel_id' => $hotelId,
-                'booking_start_date' => $data['booking_start_date'],
-                'booking_end_date' => $data['booking_end_date'],
-                'check_in' => $data['check_in'] ?? null,
-                'check_out' => $data['check_out'] ?? null,
+                # 'booking_start_date' => $data['booking_start_date'],
+                # 'booking_end_date' => $data['booking_end_date'],
+                # 'check_in' => $data['check_in'] ?? null,
+                # 'check_out' => $data['check_out'] ?? null,
                 'total' => $data['total'],
                 'paid' => $data['payment']['amount'],
                 'due' => $data['total'] - $data['paid'],
-                'status' => 'confirmed',
+                # 'status' => 'confirmed',
             ]);
 
             // 2. Add booking details (multiple rooms)
@@ -50,16 +64,21 @@ class BookingRepository
                     'booking_id' => $booking->id,
                     'user_id' => $userId,
                     'hotel_id' => $room['hotel_id'],
-                    'floor_id' => $room['floor_id'] ?? null,
+                    'floor_id' => $room['floor_id'],
                     'room_id' => $room['room_id'],
-                    'booking_start_date' => $data['booking_start_date'],
-                    'booking_end_date' => $data['booking_end_date'],
+                    'booking_start_date' => $room['booking_start_date'],
+                    'booking_end_date' => $room['booking_end_date'],
+                    'check_in' => $room['check_in'] ?? null,
+                    'check_out' => $room['check_out'] ?? null,
+                    'day_count' => $room['day_count'],
+                    'rent' => $room['rent'],
+                    'status' => 'confirmed',
                 ]);
                 // ii. Update the corresponding room status and booking times
                 Room::where('id', $room['room_id'])
                     ->update([
-                        'start_booking_time' => $data['booking_start_date'],
-                        'end_booking_time'   => $data['booking_end_date'],
+                        'start_booking_time' => $room['booking_start_date'],
+                        'end_booking_time'   => $room['booking_end_date'],
                         'current_status'     => 'booked',
                     ]);
             }
@@ -288,33 +307,34 @@ class BookingRepository
             ? ['status' => true]
             : ['status' => false, 'message' => 'All selected rooms must belong to the same hotel.'];
     }
-    public function checkBookingStatusAlreadyCheckedIn($bookingId)
+    public function checkBookingStatusAlreadyCheckedIn($bookingDetailId)
     {
-        $checkValid = Booking::where('id', $bookingId)
+        $checkValid = BookingDetail::where('id', $bookingDetailId)
             ->where('check_in', '!=', null)
             ->where('status', '!=', 'confirmed')
             ->exists();
         return $checkValid;
     }
-    public function checkBookingStatusAlreadyCheckedOut($bookingId)
+    public function checkBookingStatusAlreadyCheckedOut($bookingDetailId)
     {
-        $checkValid = Booking::where('id', $bookingId)
+        $checkValid = BookingDetail::where('id', $bookingDetailId)
             ->where('check_out', '!=', null)
             ->where('status', '!=', 'checked_in')
             ->exists();
         return $checkValid;
     }
-    public function checkDue($bookingId)
+    public function checkDue($bookingDetailId)
     {
+        $bookingId = BookingDetail::where('id', $bookingDetailId)->value('booking_id');
         $checkValid = Booking::where('id', $bookingId)
             ->where('due', '>', 0)
             ->exists();
         return $checkValid;
     }
-    public function checkedInStatusUpdate(array $data, $userId, $bookingId)
+    public function checkedInStatusUpdate(array $data, $userId, $bookingDetailId)
     {
         try {
-            $booking = Booking::where('id', $bookingId)->first();
+            $booking = BookingDetail::where('id', $bookingDetailId)->first();
             $booking->check_in = now();
             $booking->status = 'checked_in';
             $booking->update();
@@ -335,18 +355,18 @@ class BookingRepository
             return null;
         }
     }
-    public function checkedOutStatusUpdate(array $data, $userId, $bookingId)
+    public function checkedOutStatusUpdate(array $data, $userId, $bookingDetailId)
     {
         DB::beginTransaction();
         try {
             // ✅ 1. Update booking status
-            $booking = Booking::findOrFail($bookingId);
+            $booking = BookingDetail::findOrFail($bookingDetailId);
             $booking->check_out = now();
             $booking->status = 'checked_out';
             $booking->save();
 
             // ✅ 2. Get all booked room IDs for this booking
-            $roomIds = BookingDetail::where('booking_id', $bookingId)->pluck('room_id');
+            $roomIds = BookingDetail::where('id', $bookingDetailId)->pluck('room_id');
 
             if ($roomIds->isNotEmpty()) {
                 // ✅ 3. Loop through each room to check conditions
