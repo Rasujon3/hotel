@@ -175,11 +175,9 @@ class FloorRepository
             return false;
         }
     }
-    public function find($id, $userId)
+    public function find($id)
     {
-        return Floor::with('images')
-            ->where('user_id', $userId)
-            ->find($id);
+        return Floor::with('images')->find($id);
     }
     public function checkValid($userId, $hotelId)
     {
@@ -197,10 +195,9 @@ class FloorRepository
             ->exists();
         return $checkNameExist;
     }
-    public function checkNameUpdateExist($id, $userId, $hotelId, $name)
+    public function checkNameUpdateExist($id, $hotelId, $name)
     {
-        $checkNameExist = Floor::where('user_id', $userId)
-            ->where('hotel_id', $hotelId)
+        $checkNameExist = Floor::where('hotel_id', $hotelId)
             ->where('name', $name)
             ->where('id', '!=', $id)
             ->exists();

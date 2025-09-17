@@ -29,7 +29,7 @@ class RoomRepository
             $rent = $data['rent'];
             $hotelId = $data['hotel_id'];
             $floorId = $data['floor_id'];
-            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
+            $bookingPercentage = $this->checkBookingPercentage($hotelId);
 
             $data['user_id'] = $userId;
             $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
@@ -93,7 +93,7 @@ class RoomRepository
             $rent = $data['rent'] ?? $room->rent;
             $hotelId = $data['hotel_id'];
             $floorId = $data['floor_id'];
-            $bookingPercentage = $this->checkBookingPercentage($userId, $hotelId);
+            $bookingPercentage = $this->checkBookingPercentage($hotelId);
 
             $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
 
@@ -120,7 +120,7 @@ class RoomRepository
                     }
                 }
 
-                $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
+                # $hotelId = $data['hotel_id'] ?? $floor->hotel_id;
                 if (!empty($data['images'])) {
                     foreach ($data['images'] as $file) {
                         $image_url = null;
@@ -206,23 +206,22 @@ class RoomRepository
     {
         return Room::with('images','hotel', 'floor')->find($id);
     }
-    public function checkExist($userId, $hotelId, $floorId)
+    public function checkExist($hotelId, $floorId)
     {
         $checkValid = Floor::where('hotel_id', $hotelId)
             ->where('id', $floorId)
             ->exists();
         return $checkValid;
     }
-    public function checkNameExist($userId, $hotelId, $floorId, $roomNo)
+    public function checkNameExist($hotelId, $floorId, $roomNo)
     {
-        $checkNameExist = Room::where('user_id', $userId)
-            ->where('hotel_id', $hotelId)
+        $checkNameExist = Room::where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->where('room_no', $roomNo)
             ->exists();
         return $checkNameExist;
     }
-    public function checkNameUpdateExist($id, $userId, $hotelId,$floorId,$roomNo)
+    public function checkNameUpdateExist($id, $hotelId,$floorId,$roomNo)
     {
         $checkNameExist = Room::where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
@@ -232,10 +231,9 @@ class RoomRepository
 
         return $checkNameExist;
     }
-    public function checkBookingPercentage($userId, $hotelId)
+    public function checkBookingPercentage($hotelId)
     {
-        $checkBookingPercentage = Hotel::where('user_id', $userId)
-            ->where('id', $hotelId)
+        $checkBookingPercentage = Hotel::where('id', $hotelId)
             ->value('booking_percentage');
 
         return $checkBookingPercentage;

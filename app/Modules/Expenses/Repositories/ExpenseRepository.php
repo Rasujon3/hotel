@@ -182,9 +182,7 @@ class ExpenseRepository
     }
     public function find($id, $userId)
     {
-        return Expense::with('images', 'hotel')
-            ->where('user_id', $userId)
-            ->find($id);
+        return Expense::with('images', 'hotel')->find($id);
     }
     public function checkValid($userId, $hotelId)
     {

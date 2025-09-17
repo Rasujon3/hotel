@@ -18,29 +18,29 @@ class ReceptionistController extends AppBaseController
     // Fetch all data
     public function index(ReceptionistRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->receptionistRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->receptionistRepository->all($userId, $hotelId);
+        $data = $this->receptionistRepository->all($user?->id, $hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Register
     public function register(ReceptionistRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->receptionistRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $register = $this->receptionistRepository->register($request, $userId);
+        $register = $this->receptionistRepository->register($request, $user?->id);
         if (!$register) {
             return $this->sendError('Something went wrong!!! [RPC-01]', 500);
         }
@@ -49,8 +49,14 @@ class ReceptionistController extends AppBaseController
     }
     public function updateReceptionist(ReceptionistRequest $request, $id)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
         $hotelId = $request->hotel_id;
+
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
         $name = $request->name;
         $email = $request->email;
 
@@ -63,7 +69,7 @@ class ReceptionistController extends AppBaseController
             return $this->sendError('Email or phone already exists.');
         }
 
-        $updated = $this->receptionistRepository->receptionistUpdate($data, $request, $userId, $id);
+        $updated = $this->receptionistRepository->receptionistUpdate($data, $request, $user?->id, $id);
         if (!$updated) {
             return $this->sendError('Something went wrong!!! [EC-02]', 500);
         }

@@ -19,42 +19,43 @@ class RoomController extends AppBaseController
     // Fetch all data
     public function index(RoomRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
         $floorId = $request->floor_id;
 
-        $checkExist = $this->roomRepository->checkExist($userId, $hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->roomRepository->all($userId, $hotelId, $floorId);
+        $data = $this->roomRepository->all($user?->id, $hotelId, $floorId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Store data
     public function store(RoomRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
 
-        $checkExist = $this->roomRepository->checkExist($userId, $hotelId, $floorId);
+        $checkExist = $this->roomRepository->checkExist($hotelId, $floorId);
         if (!$checkExist) {
             return $this->sendError('No data found.', 404);
         }
 
-        $checkNameExist = $this->roomRepository->checkNameExist($userId, $hotelId, $floorId, $roomNo);
+        $checkNameExist = $this->roomRepository->checkNameExist($hotelId, $floorId, $roomNo);
         if ($checkNameExist) {
             return $this->sendError('Room no already exist.', 409);
         }
 
-        $checkBookingPercentage = $this->roomRepository->checkBookingPercentage($userId, $hotelId);
+        $checkBookingPercentage = $this->roomRepository->checkBookingPercentage($hotelId);
         if (!$checkBookingPercentage) {
             return $this->sendError('Please add booking percentage.', 400);
         }
 
-        $store = $this->roomRepository->store($request->all(), $userId);
+        $store = $this->roomRepository->store($request->all(), $user?->id);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
         }
@@ -83,7 +84,7 @@ class RoomController extends AppBaseController
             return $this->sendError('Data not found');
         }
 
-        $checkNameExist = $this->roomRepository->checkNameUpdateExist($data->id, $userId, $hotelId,$floorId,$roomNo);
+        $checkNameExist = $this->roomRepository->checkNameUpdateExist($data->id, $hotelId,$floorId,$roomNo);
         if ($checkNameExist) {
             return $this->sendError('Room no already exist.', 404);
         }

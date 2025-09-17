@@ -36,7 +36,7 @@ class PaymentRepository
 
         return $data;
     }
-    public function collectDue($bookingId, $hotelId, $userId, $amount)
+    public function collectDue($bookingId, $hotelId, $amount)
     {
         DB::beginTransaction();
         try {
@@ -289,10 +289,10 @@ class PaymentRepository
             ->exists();
         return $checkValid;
     }
-    public function checkDueZero($bookingId, $hotelId, $userId)
+    public function checkDueZero($bookingId, $hotelId)
     {
         $checkDueZero = Booking::where('id', $bookingId)
-            ->where('user_id', $userId)
+            # ->where('user_id', $userId)
             ->where('hotel_id', $hotelId)
             ->where('due', '<=', 0)
             ->exists();

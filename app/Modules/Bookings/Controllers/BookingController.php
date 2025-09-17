@@ -122,6 +122,14 @@ class BookingController extends AppBaseController
     }
     public function updateStatus(BookingRequest $request)
     {
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        $hotelId = $request->hotel_id;
+
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
         $status = $request->status;
 
         return $status === 'checked_in'

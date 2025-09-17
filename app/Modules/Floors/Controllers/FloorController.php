@@ -27,31 +27,31 @@ class FloorController extends AppBaseController
     // Fetch all data
     public function index(FloorRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->floorRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->floorRepository->all($userId, $hotelId);
+        $data = $this->floorRepository->all($user?->id, $hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
     // Store data
     public function store(FloorRequest $request)
     {
-        $userId = getUser()?->id;
-        $hotelId = $request->hotel_id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $name = $request->name;
+        $hotelId = $request->hotel_id;
 
-        $checkValid = $this->floorRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkNameExist = $this->floorRepository->checkNameExist($userId, $hotelId, $name);
+        $checkNameExist = $this->floorRepository->checkNameExist($user?->id, $hotelId, $name);
         if ($checkNameExist) {
             return $this->sendError('Floor name already exist.', 404);
         }
@@ -67,9 +67,7 @@ class FloorController extends AppBaseController
     // Get single details data
     public function show($floor)
     {
-        $userId = getUser()?->id;
-
-        $data = $this->floorRepository->find($floor, $userId);
+        $data = $this->floorRepository->find($floor);
         if (!$data) {
             return $this->sendError('Data not found');
         }
@@ -84,12 +82,12 @@ class FloorController extends AppBaseController
         $hotelId = $request->hotel_id;
         $name = $request->name;
 
-        $data = $this->floorRepository->find($floor, $userId);
+        $data = $this->floorRepository->find($floor);
         if (!$data) {
             return $this->sendError('Data not found');
         }
 
-        $checkNameExist = $this->floorRepository->checkNameUpdateExist($data->id, $userId, $hotelId, $name);
+        $checkNameExist = $this->floorRepository->checkNameUpdateExist($data->id, $hotelId, $name);
         if ($checkNameExist) {
             return $this->sendError('Floor name already exist.', 404);
         }
@@ -105,9 +103,7 @@ class FloorController extends AppBaseController
     // Delete data
     public function destroy($id)
     {
-        $userId = getUser()?->id;
-
-        $data = $this->floorRepository->find($id, $userId);
+        $data = $this->floorRepository->find($id);
         if (!$data) {
             return $this->sendError('Data not found');
         }

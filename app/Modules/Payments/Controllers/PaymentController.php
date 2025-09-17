@@ -21,13 +21,12 @@ class PaymentController extends AppBaseController
     // Fetch all data
     public function dueList(PaymentRequest $request)
     {
-        $userId = getUser()?->id;
-        #$userTypeId = getUser()?->user_type_id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkExist = $this->paymentRepository->checkExist($hotelId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
         $data = $this->paymentRepository->dueList($hotelId);
@@ -35,14 +34,13 @@ class PaymentController extends AppBaseController
     }
     public function dueSearch(PaymentRequest $request)
     {
-        $userId = getUser()?->id;
-        #$userTypeId = getUser()?->user_type_id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
         $phone = $request->phone;
 
-        $checkExist = $this->paymentRepository->checkExist($hotelId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
         $data = $this->paymentRepository->dueSearch($hotelId, $phone);
@@ -50,22 +48,27 @@ class PaymentController extends AppBaseController
     }
     public function collectDue(PaymentRequest $request)
     {
-        $userId = getUser()?->id;
-        #$userTypeId = getUser()?->user_type_id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        # $userTypeId = getUser()?->user_type_id;
         $hotelId = $request->hotel_id;
-        $userId = $request->user_id;
+        # $userId = $request->user_id;
         $bookingId = $request->booking_id;
         $amount = $request->amount;
 
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+
         #return $this->sendResponse([$userId, $hotelId, $bookingId, $amount], 'Data retrieved successfully.');
-        $checkExist = $this->paymentRepository->checkDueZero($bookingId, $hotelId, $userId);
+        $checkExist = $this->paymentRepository->checkDueZero($bookingId, $hotelId);
         if ($checkExist) {
             return $this->sendError('No due found.', 404);
         }
 
-        $data = $this->paymentRepository->collectDue($bookingId, $hotelId, $userId, $amount);
+        $data = $this->paymentRepository->collectDue($bookingId, $hotelId, $amount);
         if (!$data) {
-            return $this->sendError('Something went wrong!!! [RC-01]', 500);
+            return $this->sendError('Something went wrong!!! [PC-01]', 500);
         }
         return $this->sendResponse($data, 'Collect due successfully.');
     }

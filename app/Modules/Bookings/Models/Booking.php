@@ -105,6 +105,7 @@ class Booking extends Model
     public static function updateStatusRules($id = null)
     {
         return [
+            'hotel_id'    => 'required|exists:hotels,id',
             'booking_id' => 'required|exists:bookings,id',
             'status' => 'required|in:checked_in,checked_out',
         ];

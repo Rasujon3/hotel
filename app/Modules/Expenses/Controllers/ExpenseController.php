@@ -21,30 +21,30 @@ class ExpenseController extends AppBaseController
     // Fetch all data
     public function index(ExpenseRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->expenseRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->expenseRepository->all($userId, $hotelId);
+        $data = $this->expenseRepository->all($user?->id, $hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
     // Store data
     public function store(ExpenseRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->expenseRepository->checkValid($userId, $hotelId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $store = $this->expenseRepository->store($request->all(),$userId);
+        $store = $this->expenseRepository->store($request->all(),$user?->id);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [EC-01]', 500);
         }

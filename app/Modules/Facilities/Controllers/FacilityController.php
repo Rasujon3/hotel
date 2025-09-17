@@ -21,13 +21,12 @@ class FacilityController extends AppBaseController
     // Fetch all data
     public function index(FacilityRequest $request)
     {
-        $userId = getUser()?->id;
-        $userTypeId = getUser()?->user_type_id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
 
-        $checkValid = $this->facilityRepository->checkValid($userId, $hotelId, $userTypeId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
         $data = $this->facilityRepository->all($hotelId);
@@ -37,22 +36,22 @@ class FacilityController extends AppBaseController
     // Store data
     public function store(FacilityRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
-        $userTypeId = getUser()?->user_type_id;
-        $name = $request->name;
 
-        $checkValid = $this->facilityRepository->checkValid($userId, $hotelId, $userTypeId);
-        if (!$checkValid) {
-            return $this->sendError('Hotel not found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkNameExist = $this->facilityRepository->checkNameExist($userId, $hotelId, $name);
+        $name = $request->name;
+
+        $checkNameExist = $this->facilityRepository->checkNameExist($hotelId, $name);
         if ($checkNameExist) {
             return $this->sendError('Facility name already exist.', 409);
         }
 
-        $store = $this->facilityRepository->store($request->all(),$userId);
+        $store = $this->facilityRepository->store($request->all(),$user?->id);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [FLC-01]', 500);
         }
@@ -61,11 +60,9 @@ class FacilityController extends AppBaseController
     }
 
     // Get single details data
-    public function show($floor)
+    public function show($id)
     {
-        $userId = getUser()?->id;
-
-        $data = $this->facilityRepository->find($floor, $userId);
+        $data = $this->facilityRepository->find($id);
         if (!$data) {
             return $this->sendError('Data not found');
         }
@@ -85,7 +82,7 @@ class FacilityController extends AppBaseController
             return $this->sendError('Data not found');
         }
 
-        $checkNameExist = $this->facilityRepository->checkNameUpdateExist($data->id, $userId, $hotelId, $name);
+        $checkNameExist = $this->facilityRepository->checkNameUpdateExist($data->id, $hotelId, $name);
         if ($checkNameExist) {
             return $this->sendError('Facility name already exist.', 404);
         }
@@ -103,7 +100,7 @@ class FacilityController extends AppBaseController
     {
         $userId = getUser()?->id;
 
-        $data = $this->facilityRepository->find($id, $userId);
+        $data = $this->facilityRepository->find($id);
         if (!$data) {
             return $this->sendError('Data not found');
         }

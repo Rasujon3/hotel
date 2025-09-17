@@ -58,7 +58,7 @@ class FacilityRepository
             $facility->update($data);
 
             DB::commit();
-            return $this->find($facility->id, $userId);
+            return $this->find($facility->id);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -124,7 +124,7 @@ class FacilityRepository
             ->exists();
         return $checkNameExist;
     }
-    public function checkNameUpdateExist($id, $userId, $hotelId, $name)
+    public function checkNameUpdateExist($id, $hotelId, $name)
     {
         $checkNameExist = Facility::where('hotel_id', $hotelId)
             ->where('name', $name)
