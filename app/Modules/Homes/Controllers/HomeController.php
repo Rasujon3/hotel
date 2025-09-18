@@ -63,6 +63,18 @@ class HomeController extends AppBaseController
         $data = $this->homeRepository->roomDetails($hotelId, $floorId, $bookingStartDate, $bookingEndDate);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function PopularPlaces()
+    {
+        $data = $this->homeRepository->popularPlaces();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+    public function hotelsByPopularPlace(HomeRequest $request)
+    {
+        $popularPlaceId = $request->popular_place_id;
+
+        $data = $this->homeRepository->hotelsByPopularPlace($popularPlaceId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
 
     // Store data
     public function store(HomeRequest $request)

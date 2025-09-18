@@ -6,6 +6,7 @@ use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
 use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
@@ -262,6 +263,34 @@ class HomeRepository
 
     public function myHotelList($userId){
         $data = Hotel::where('user_id',$userId)->get();
+        return $data;
+    }
+    public function hotelsByPopularPlace($popularPlaceId)
+    {
+        $data =  Hotel::with('ratings')
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings')
+            ->where('popular_place_id', $popularPlaceId)
+            ->where('status', 'Active')
+            ->get()
+            ->map(function ($hotel) {
+                return [
+                    'id'            => $hotel->id,
+                    'name'          => $hotel->hotel_name,
+                    'address'       => $hotel->hotel_address,
+                    'avg_rating'    => round($hotel->ratings_avg_rating, 1),
+                    'rating_count'  => $hotel->ratings_count,
+                ];
+            });
+        return $data;
+    }
+    public function popularPlaces()
+    {
+        return Cache::remember('popular_places', now()->addMinutes(10), fn() => $this->getPopularPlacesData());
+    }
+    public function getPopularPlacesData()
+    {
+        $data =  PopularPlace::where('status', 'Active')->get();
         return $data;
     }
 }

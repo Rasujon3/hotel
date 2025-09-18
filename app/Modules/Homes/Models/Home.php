@@ -64,6 +64,12 @@ class Home extends Model
             'long'  => 'required|numeric|between:-180,180',
         ];
     }
+    public static function hotelsByPopularPlaceRules()
+    {
+        return [
+            'popular_place_id' => 'required|numeric|exists:popular_places,id',
+        ];
+    }
     public function user() : belongsTo
     {
         return $this->belongsTo(User::class,'user_id');

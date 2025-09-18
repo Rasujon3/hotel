@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Packages\Models\Package;
+use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,6 +34,7 @@ class Hotel extends Model
         'check_in_time',
         'check_out_time',
         'package_id',
+        'popular_place_id',
         'package_start_date',
         'package_end_date',
     ];
@@ -63,6 +65,7 @@ class Hotel extends Model
             'hotel_address'      => 'nullable|string',
             'hotel_description' => 'nullable|string',
             'booking_percentage' => 'nullable|numeric|min:1|max:100',
+            'popular_place_id'    => 'required|integer|exists:popular_places,id',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ];
@@ -102,5 +105,9 @@ class Hotel extends Model
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
+    }
+    public function popularPlace(): belongsTo
+    {
+        return $this->belongsTo(PopularPlace::class, 'popular_place_id');
     }
 }

@@ -1,17 +1,13 @@
 <?php
 
-namespace App\Modules\Homes\Requests;
+namespace App\Modules\PopularPlaces\Requests;
 
 use App\Modules\Areas\Models\Area;
-use App\Modules\Facilities\Models\Facility;
-use App\Modules\Floors\Models\Floor;
-use App\Modules\Homes\Models\Home;
 use App\Modules\Hotels\Models\Hotel;
-use App\Modules\Packages\Models\Package;
-use App\Modules\Ratings\Models\Rating;
+use App\Modules\PopularPlaces\Models\PopularPlace;
 use Illuminate\Foundation\Http\FormRequest;
 
-class HomeRequest extends FormRequest
+class PopularPlaceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -49,33 +45,17 @@ class HomeRequest extends FormRequest
         if ($routeName === 'areas.checkAvailability') {
             return Area::checkAvailabilityRules();
         }
-        $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'homes.hotel-details') {
-            return Home::hotelDetailsRules();
+        if ($routeName === 'popularPlaces.check-balance') {
+            return PopularPlace::checkBalanceRules();
         }
 
-        if ($routeName === 'homes.room-details') {
-            return Home::roomDetailsRules();
+        if ($routeName === 'popularPlaces.revenue-tracker') {
+            return PopularPlace::checkBalanceRules();
         }
 
-        if ($routeName === 'homes.search-by-area') {
-            return Home::searchByAreaRules();
-        }
-
-        if ($routeName === 'homes.hotels-by-popular-place') {
-            return Home::hotelsByPopularPlaceRules();
-        }
-
-        /*
-        if ($routeName === 'ratings.list') {
-            return Rating::listRules();
-        }
-        */
-
-        $id = $this->route('rating') ?: null;
-
-        return Rating::rules($id);
+        $id = $this->route('popularPlace') ?: null;
+        return PopularPlace::rules($id);
     }
 }
