@@ -135,6 +135,7 @@ class HotelRepository
             $hotel->hotel_description = $data['hotel_description'] ?? $hotel->hotel_description;
             $hotel->booking_percentage = $data['booking_percentage'] ?? $hotel->booking_percentage;
             $hotel->popular_place_id = $data['popular_place_id'] ?? $hotel->popular_place_id;
+            $hotel->system_commission = $data['system_commission'] ?? $hotel->system_commission;
             $hotel->check_in_time = $checkIn;
             $hotel->check_out_time = $checkOut;
             $hotel->update();

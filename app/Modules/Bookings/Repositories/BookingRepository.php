@@ -11,6 +11,7 @@ use App\Modules\Payments\Models\Payment;
 use App\Modules\Rooms\Models\Room;
 use App\Modules\Rooms\Models\RoomImg;
 use App\Services\S3Service;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -98,8 +99,10 @@ class BookingRepository
 
             // 4. Balance add on hotels table
             $hotel = Hotel::where('id', $hotelId)->first();
-            $hotel->balance = $hotel->balance + $data['payment']['amount'];
-            $hotel->update();
+            $calculateSysCom = $this->calculateSysCom($data['total'], $hotel->system_commission);
+
+            $newBalance = $hotel->balance + $data['payment']['amount'] - $calculateSysCom;
+            $hotel->update(['balance' => $newBalance]);
 
             DB::commit();
             return $booking;
@@ -117,6 +120,11 @@ class BookingRepository
 
             return null;
         }
+    }
+
+    public function calculateSysCom($total, $sysCom)
+    {
+        return ceil(($total * $sysCom) / 100);
     }
     public function update(Room $room, array $data, $userId)
     {
@@ -291,6 +299,7 @@ class BookingRepository
         if (!$room) {
             return ['status' => false, 'message' => 'Room does not exist.'];
         }
+        $roomEndBookingTime = Carbon::parse($room->end_booking_time)->startOfDay();
 
         if ($room->end_booking_time > $bookingStartDate) {
             return ['status' => false, 'message' => "Room {$room->room_no} is currently {$room->current_status}."];

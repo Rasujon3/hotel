@@ -65,7 +65,8 @@ class Hotel extends Model
             'hotel_address'      => 'nullable|string',
             'hotel_description' => 'nullable|string',
             'booking_percentage' => 'nullable|numeric|min:1|max:100',
-            'popular_place_id'    => 'required|integer|exists:popular_places,id',
+            'popular_place_id'    => 'nullable|integer|exists:popular_places,id',
+            'system_commission' => 'required|numeric|min:1|max:99999999.99',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ];

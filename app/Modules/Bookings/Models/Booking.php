@@ -63,6 +63,8 @@ class Booking extends Model
             'rooms.*.hotel_id'             => ['required', 'integer', 'exists:hotels,id'],
             'rooms.*.floor_id'             => ['nullable', 'integer', 'exists:floors,id'],
             'rooms.*.room_id'              => ['required', 'integer', 'exists:rooms,id'],
+            'rooms.*.day_count'            => ['required', 'integer', 'min:1'],
+            'rooms.*.rent'                 => ['required', 'integer', 'min:1'],
 
             // Booking Dates
             'rooms.*.booking_start_date'   => ['required', 'date', 'after_or_equal:today'],

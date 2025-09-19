@@ -238,4 +238,9 @@ class RoomRepository
 
         return $checkBookingPercentage;
     }
+    public function checkSystemCommission($hotelId)
+    {
+        $checkSystemCommission = Hotel::where('id', $hotelId)->value('system_commission');
+        return $checkSystemCommission > 0;
+    }
 }

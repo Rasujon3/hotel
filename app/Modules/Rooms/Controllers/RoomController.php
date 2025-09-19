@@ -55,6 +55,11 @@ class RoomController extends AppBaseController
             return $this->sendError('Please add booking percentage.', 400);
         }
 
+        $checkSystemCommission = $this->roomRepository->checkSystemCommission($hotelId);
+        if (!$checkSystemCommission) {
+            return $this->sendError('Please add system commission.', 400);
+        }
+
         $store = $this->roomRepository->store($request->all(), $user?->id);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
