@@ -52,10 +52,11 @@ class BookingRepository
                 # 'booking_end_date' => $data['booking_end_date'],
                 # 'check_in' => $data['check_in'] ?? null,
                 # 'check_out' => $data['check_out'] ?? null,
+                'payment_type' => 'Online',
                 'total' => $data['total'],
                 'paid' => $data['payment']['amount'],
                 'due' => $data['total'] - $data['paid'],
-                # 'status' => 'confirmed',
+                'status' => 'confirmed',
             ]);
 
             // 2. Add booking details (multiple rooms)

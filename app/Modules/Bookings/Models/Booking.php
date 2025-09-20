@@ -22,6 +22,7 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'hotel_id',
+        'payment_type',
         'booking_detail_id',
         'booking_start_date',
         'booking_end_date',
