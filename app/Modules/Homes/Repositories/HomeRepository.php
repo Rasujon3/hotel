@@ -6,11 +6,13 @@ use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Offers\Models\Offer;
 use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
 use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
 use App\Services\S3Service;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -292,5 +294,33 @@ class HomeRepository
     {
         $data =  PopularPlace::where('status', 'Active')->get();
         return $data;
+    }
+    public function weeklyOffer()
+    {
+        // 1. Calculate today and 6 days ahead
+        $today = Carbon::today();
+        $endDate = Carbon::today()->addDays(6);
+
+        // 2. Fetch offers where the offer period overlaps with today → next 6 days
+        $offers = Offer::where(function ($query) use ($today, $endDate) {
+            $query->whereBetween('start_date', [$today, $endDate])
+                ->orWhereBetween('end_date', [$today, $endDate])
+                ->orWhere(function ($q) use ($today, $endDate) {
+                    // Covers offers that start before today but end after today
+                    $q->where('start_date', '<=', $today)
+                        ->where('end_date', '>=', $endDate);
+                });
+        })
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        // 3. Prepare heading text (e.g., "Save on stays for 20 September - 27 September")
+        $heading = "Save on stays for " . $today->format('d F') . " - " . $endDate->format('d F');
+
+        // 4. Return API response
+        return [
+            'heading' => $heading,
+            'offers'  => $offers,
+        ];
     }
 }
