@@ -40,6 +40,15 @@ class RegisterRequest extends FormRequest
 
         return Country::rules($countryId);
         */
+
+        if ($routeName === 'user.profile.update') {
+            return User::profileUpdateRules($this);
+        }
+
+        if ($routeName === 'user.change-password') {
+            return User::changePasswordRules($this);
+        }
+
         return User::rules($this);
     }
 }

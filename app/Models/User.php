@@ -28,6 +28,7 @@ class User extends Authenticatable
         'full_name',
         'email',
         'phone',
+        'address',
         'user_type_id',
         'role',
         'ip_address',
@@ -106,8 +107,37 @@ class User extends Authenticatable
                 'hotel_address' => 'required|string|max:255',
                 'lat' => 'required|numeric',
                 'long' => 'required|numeric',
+                'package_id' => 'required|numeric|exists:packages,id',
             ]);
         }
+
+        return $rules;
+    }
+    public static function profileUpdateRules($request = null)
+    {
+        $uniqueEmailRule = Rule::unique('users', 'email');
+
+        if ($request && $request->user_id) {
+            $uniqueEmailRule->ignore($request->user_id, 'id');
+        }
+
+        $rules = [
+            'user_id' => 'required|numeric|exists:users,id',
+            'full_name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', $uniqueEmailRule],
+            'address' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ];
+
+        return $rules;
+    }
+    public static function changePasswordRules()
+    {
+        $rules = [
+            'current_password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:6|different:current_password',
+            'confirm_new_password' => 'required|string|min:6|same:new_password',
+        ];
 
         return $rules;
     }

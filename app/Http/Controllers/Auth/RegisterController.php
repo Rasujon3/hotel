@@ -76,21 +76,20 @@ class RegisterController extends AppBaseController
                 'image_path'       => $image_path,
                 'my_refer_code'    => $myReferCode,
                 'password'         => Hash::make($request->password),
-                'status'           => ($request->user_type_id === '2' && $request->role === 'user')
-                                        ? 'Active'
-                                        : 'Inactive',
+                'status'           => 'Active'
             ]);
 
             // ✅ If owner, also create hotel record
             if ($request->user_type_id == 3 && $request->role === 'owner') {
                 Hotel::create([
-                    'user_id'          => $user->id,
-                    'hotel_name'       => $request->hotel_name,
-                    'hotel_description'=> $request->hotel_description,
-                    'hotel_address'    => $request->hotel_address,
-                    'lat'              => $lat,
-                    'long'             => $long,
-                    'status'           => 'Inactive',
+                    'user_id'           => $user->id,
+                    'hotel_name'        => $request->hotel_name,
+                    'hotel_description' => $request->hotel_description,
+                    'hotel_address'     => $request->hotel_address,
+                    'lat'               => $lat,
+                    'long'              => $long,
+                    'package_id'        => $request->package_id,
+                    'status'            => 'Active',
                 ]);
             }
 
@@ -131,6 +130,135 @@ class RegisterController extends AppBaseController
         } while (User::where('my_refer_code', $code)->exists());
 
         return (string) $code;
+    }
+    public function userInfo()
+    {
+        DB::beginTransaction();
+        try {
+            $user = auth()->user();
+
+            DB::commit();
+
+            return $this->sendResponse($user, 'User retrieved successfully.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in updating userInfo: ', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!!!',
+            ], 500);
+        }
+    }
+    public function userProfileUpdate(RegisterRequest $request, S3Service $s3)
+    {
+        DB::beginTransaction();
+        try {
+            $auth = auth()->user();
+            if ($auth->id != $request->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.',
+                ], 403);
+            }
+            $user = User::where('id', $request->user_id)->first();
+
+            $image_url = $user->image_url;
+            $image_path = $user->image_path;
+            if($request->hasFile('image')) {
+                $file = $request->file('image');
+                $result = $s3->upload($file, 'profile');
+
+                if ($result) {
+                    $image_url = $result['url'];
+                    $image_path = $result['path'];
+                }
+            }
+
+            $user->update([
+                'full_name'    => $request->full_name ?? $user->full_name,
+                'email'        => $request->email ?? $user->email,
+                'image_url'    => $image_url,
+                'image_path'   => $image_path,
+                'address'      => $request->address ?? $user->address,
+            ]);
+
+            DB::commit();
+
+            return $this->sendResponse([
+                'user' => $user,
+            ], 'User updated successfully.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in updating User: ', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!!!',
+            ], 500);
+        }
+    }
+    public function changePassword(RegisterRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $auth = auth()->user();
+            if ($auth->id != $request->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.',
+                ], 403);
+            }
+            $user = User::where('id', $request->user_id)->first();
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password does not match.',
+                ], 400);
+            }
+
+            $user->update([
+                'password'    => Hash::make($request->new_password),
+            ]);
+
+            DB::commit();
+
+            return $this->sendResponse([
+                'user' => $user,
+            ], 'User updated successfully.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in updating User: ', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!!!',
+            ], 500);
+        }
     }
 
 }

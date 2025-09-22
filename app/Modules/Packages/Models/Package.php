@@ -33,8 +33,8 @@ class Package extends Model
             $uniqueCodeRule->ignore($id);
         }
         return [
-            'name' => ['required', 'string', 'max:45', $uniqueCodeRule],
-            'duration' => 'required|string|max:191|in:weekly,monthly,yearly',
+            'name' => ['required', 'string', 'max:45', 'in:3 Star Hotel,4 Star Hotel,5 Star Hotel', $uniqueCodeRule],
+            'duration' => 'required|string|max:191|in:monthly',
             'price' => 'required|numeric|min:1',
             'status' => 'required|in:Active,Inactive',
 

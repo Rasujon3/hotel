@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('payment_type', 50)->nullable()->after('hotel_id');
-            $table->dropColumn('booking_start_date');
-            $table->dropColumn('booking_end_date');
-            $table->dropColumn('check_in');
-            $table->dropColumn('check_out');
+//            $table->string('payment_type', 50)->nullable()->after('hotel_id');
+//            $table->dropColumn('booking_start_date');
+//            $table->dropColumn('booking_end_date');
+//            $table->dropColumn('check_in');
+//            $table->dropColumn('check_out');
         });
     }
 
