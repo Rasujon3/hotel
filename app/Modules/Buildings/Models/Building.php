@@ -3,6 +3,7 @@
 namespace App\Modules\Buildings\Models;
 
 use App\Models\User;
+use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,6 +76,10 @@ class Building extends Model
     public function updatedBy() : belongsTo
     {
         return $this->belongsTo(User::class,'updated_by');
+    }
+    public function floors(): HasMany
+    {
+        return $this->hasMany(Floor::class, 'building_id');
     }
     public function rooms(): HasMany
     {

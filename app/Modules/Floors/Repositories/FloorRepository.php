@@ -26,13 +26,14 @@ class FloorRepository
         DB::beginTransaction();
         try {
             $data['user_id'] = $userId;
+            $data['created_by'] = $userId;
             $hotelId = $data['hotel_id'];
+
             // Create the record in the database
             $created = Floor::create($data);
 
-            $s3 = app(S3Service::class);
-
             if (!empty($data['images'])) {
+                $s3 = app(S3Service::class);
                 foreach ($data['images'] as $file) {
                     $image_url = null;
                     $image_path = null;
@@ -75,6 +76,8 @@ class FloorRepository
     {
         DB::beginTransaction();
         try {
+            $data['updated_by'] = $userId;
+
             // Perform the update
             $floor->update($data);
 
@@ -187,17 +190,18 @@ class FloorRepository
             ->exists();
         return $checkValid;
     }
-    public function checkNameExist($userId, $hotelId, $name)
+    public function checkNameExist($hotelId, $name, $buildingId)
     {
-        $checkNameExist = Floor::where('user_id', $userId)
+        $checkNameExist = Floor::where('building_id', $buildingId)
             ->where('hotel_id', $hotelId)
             ->where('name', $name)
             ->exists();
         return $checkNameExist;
     }
-    public function checkNameUpdateExist($id, $hotelId, $name)
+    public function checkNameUpdateExist($id, $hotelId, $name, $buildingId)
     {
         $checkNameExist = Floor::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('name', $name)
             ->where('id', '!=', $id)
             ->exists();

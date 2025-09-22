@@ -137,6 +137,10 @@ class BuildingRepository
     {
         DB::beginTransaction();
         try {
+            // 1. Delete related floors, rooms first
+            $building->floors()->delete();
+            $building->rooms()->delete();
+
             // 2. Get all floor images
             $oldImages = $building->images; // Use the relationship property to get the collection
 
