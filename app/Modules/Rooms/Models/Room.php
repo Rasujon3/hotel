@@ -3,6 +3,7 @@
 namespace App\Modules\Rooms\Models;
 
 use App\Models\User;
+use App\Modules\Buildings\Models\Building;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ class Room extends Model
     protected $fillable = [
         'user_id',
         'hotel_id',
+        'building_id',
         'floor_id',
         'room_no',
         'bed_type',
@@ -36,6 +38,8 @@ class Room extends Model
         'icon',
         'status',
         'discount_amount',
+        'created_by',
+        'updated_by',
     ];
 
     protected $hidden = [
@@ -43,6 +47,8 @@ class Room extends Model
         'end_booking_time',
         'current_status',
         'calculate_booking_price',
+        'created_by',
+        'updated_by',
     ];
 
     public static function rules($id = null)
@@ -50,6 +56,7 @@ class Room extends Model
         return [
             'user_id'     => 'nullable|exists:users,id',
             'hotel_id'    => 'required|exists:hotels,id',
+            'building_id'    => 'required|exists:buildings,id',
             'floor_id'    => 'required|exists:floors,id',
             'room_no'     => 'required|string|max:50',
             'bed_type'    => 'required|in:Single,Double',
@@ -60,14 +67,15 @@ class Room extends Model
             'rent'       => 'required|numeric|min:1|max:99999999.99',
             'discount_amount' => 'nullable|numeric|min:1|max:99999999.99',
             'system_commission' => 'nullable|numeric|min:1|max:99999999.99',
-            'images' => 'nullable|array|min:1',
-            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'images' => 'nullable|array|min:1|max:3',
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ];
     }
 
     public static function listRules($id = null)
     {
         return [
+            'building_id'    => 'required|exists:buildings,id',
             'hotel_id'    => 'required|exists:hotels,id',
             'floor_id'    => 'required|exists:floors,id',
         ];
@@ -78,6 +86,7 @@ class Room extends Model
         return [
             'user_id'     => 'nullable|exists:users,id',
             'hotel_id'    => 'required|exists:hotels,id',
+            'building_id'    => 'required|exists:buildings,id',
             'floor_id'    => 'required|exists:floors,id',
             'room_no'     => 'nullable|string|max:50',
             'bed_type'    => 'nullable|in:Single,Double',
@@ -88,8 +97,8 @@ class Room extends Model
             'rent'       => 'nullable|numeric|min:1|max:99999999.99',
             'discount_amount' => 'nullable|numeric|min:1|max:99999999.99',
             'system_commission' => 'nullable|numeric|min:1|max:99999999.99',
-            'images' => 'nullable|array|min:1',
-            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'images' => 'nullable|array|min:1|max:3',
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ];
     }
 
@@ -101,6 +110,10 @@ class Room extends Model
     public function hotel() : belongsTo
     {
         return $this->belongsTo(Hotel::class,'hotel_id');
+    }
+    public function building() : belongsTo
+    {
+        return $this->belongsTo(Building::class,'building_id');
     }
     public function floor() : belongsTo
     {

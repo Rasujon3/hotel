@@ -21,6 +21,7 @@ class RoomController extends AppBaseController
     {
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        $buildingId = $request->building_id;
         $hotelId = $request->hotel_id;
         $floorId = $request->floor_id;
 
@@ -28,7 +29,7 @@ class RoomController extends AppBaseController
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->roomRepository->all($user?->id, $hotelId, $floorId);
+        $data = $this->roomRepository->all($user?->id, $hotelId, $floorId, $buildingId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Store data
@@ -36,16 +37,16 @@ class RoomController extends AppBaseController
     {
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        $buildingId = $request->building_id;
         $hotelId = $request->hotel_id;
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
 
-        $checkExist = $this->roomRepository->checkExist($hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkNameExist = $this->roomRepository->checkNameExist($hotelId, $floorId, $roomNo);
+        $checkNameExist = $this->roomRepository->checkNameExist($hotelId, $floorId, $roomNo, $buildingId);
         if ($checkNameExist) {
             return $this->sendError('Room no already exist.', 409);
         }
@@ -80,6 +81,7 @@ class RoomController extends AppBaseController
     public function update(RoomRequest $request, $id)
     {
         $userId = getUser()?->id;
+        $buildingId = $request->building_id;
         $hotelId = $request->hotel_id;
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
@@ -89,7 +91,7 @@ class RoomController extends AppBaseController
             return $this->sendError('Data not found');
         }
 
-        $checkNameExist = $this->roomRepository->checkNameUpdateExist($data->id, $hotelId,$floorId,$roomNo);
+        $checkNameExist = $this->roomRepository->checkNameUpdateExist($data->id, $hotelId,$floorId,$roomNo,$buildingId);
         if ($checkNameExist) {
             return $this->sendError('Room no already exist.', 404);
         }

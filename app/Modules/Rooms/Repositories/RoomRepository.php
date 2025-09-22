@@ -13,9 +13,10 @@ use Exception;
 
 class RoomRepository
 {
-    public function all($userId, $hotelId, $floorId)
+    public function all($userId, $hotelId, $floorId, $buildingId)
     {
         $data = Room::with('images','hotel', 'floor')
+            ->where('building_id', $buildingId)
             ->where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->get();
@@ -32,6 +33,7 @@ class RoomRepository
             $bookingPercentage = $this->checkBookingPercentage($hotelId);
 
             $data['user_id'] = $userId;
+            $data['created_by'] = $userId;
             $data['booking_price'] = calculateBookingPrice($rent, $bookingPercentage);
 
             // icon
@@ -90,6 +92,8 @@ class RoomRepository
     {
         DB::beginTransaction();
         try {
+            $data['updated_by'] = $userId;
+
             $rent = $data['rent'] ?? $room->rent;
             $hotelId = $data['hotel_id'];
             $floorId = $data['floor_id'];
@@ -204,26 +208,29 @@ class RoomRepository
     }
     public function find($id)
     {
-        return Room::with('images','hotel', 'floor')->find($id);
+        return Room::with('images','hotel', 'building', 'floor')->find($id);
     }
-    public function checkExist($hotelId, $floorId)
+    public function checkExist($hotelId, $floorId, $buildingId)
     {
         $checkValid = Floor::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('id', $floorId)
             ->exists();
         return $checkValid;
     }
-    public function checkNameExist($hotelId, $floorId, $roomNo)
+    public function checkNameExist($hotelId, $floorId, $roomNo, $buildingId)
     {
         $checkNameExist = Room::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('floor_id', $floorId)
             ->where('room_no', $roomNo)
             ->exists();
         return $checkNameExist;
     }
-    public function checkNameUpdateExist($id, $hotelId,$floorId,$roomNo)
+    public function checkNameUpdateExist($id, $hotelId,$floorId,$roomNo, $buildingId)
     {
         $checkNameExist = Room::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('floor_id', $floorId)
             ->where('room_no', $roomNo)
             ->where('id', '!=', $id)
