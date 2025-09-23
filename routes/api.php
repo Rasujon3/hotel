@@ -11,7 +11,7 @@ Route::prefix('/v1')->middleware('api')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::post('/logout', [LoginController::class, 'logout']);
+    Route::post('/logout', [LoginController::class, 'logout'])->name('user.logout')->middleware(['auth:sanctum']);
 });
     Route::post('/register', [RegisterController::class, 'register']);
     Route::get('/user-info', [RegisterController::class, 'userInfo'])->name('user.info')->middleware(['auth:sanctum', 'roles:user']);

@@ -237,11 +237,13 @@ class RegisterController extends AppBaseController
                 'password'    => Hash::make($request->new_password),
             ]);
 
+            $request->user()->tokens()->delete();
+
             DB::commit();
 
             return $this->sendResponse([
                 'user' => $user,
-            ], 'User updated successfully.');
+            ], 'Password changed successfully.');
 
         } catch (Exception $e) {
             DB::rollBack();
