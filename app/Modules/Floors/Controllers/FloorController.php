@@ -30,12 +30,13 @@ class FloorController extends AppBaseController
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
+        $buildingId = $request->building_id;
 
         if (!in_array($hotelId, $userHotelIds,false)) {
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->floorRepository->all($user?->id, $hotelId);
+        $data = $this->floorRepository->all($user?->id, $hotelId, $buildingId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 

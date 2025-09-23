@@ -52,6 +52,7 @@ class Floor extends Model
     {
         return [
             'hotel_id' => 'required|string|max:191|exists:hotels,id',
+            'building_id' => 'required|numeric|exists:buildings,id',
         ];
     }
     public static function updateRules()

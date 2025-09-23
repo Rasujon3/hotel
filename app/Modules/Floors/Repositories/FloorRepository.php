@@ -12,11 +12,11 @@ use Exception;
 
 class FloorRepository
 {
-    public function all($userId, $hotelId)
+    public function all($userId, $hotelId, $buildingId)
     {
         $data = Floor::with('images')
             ->where('hotel_id', $hotelId)
-            ->where('user_id', $userId)
+            ->where('building_id', $buildingId)
             ->get();
 
         return $data;
@@ -119,7 +119,7 @@ class FloorRepository
             }
 
             DB::commit();
-            return $floor;
+            return $this->find($floor);
         } catch (Exception $e) {
             DB::rollBack();
 
