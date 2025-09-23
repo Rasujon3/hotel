@@ -56,7 +56,6 @@ class RegisterController extends AppBaseController
                 }
             }
 
-
             // Create new user
             $user = User::create([
                 'full_name'        => $request->full_name,
@@ -81,7 +80,7 @@ class RegisterController extends AppBaseController
 
             // ✅ If owner, also create hotel record
             if ($request->user_type_id == 3 && $request->role === 'owner') {
-                Hotel::create([
+                $hotel =  Hotel::create([
                     'user_id'           => $user->id,
                     'hotel_name'        => $request->hotel_name,
                     'hotel_description' => $request->hotel_description,
@@ -91,6 +90,7 @@ class RegisterController extends AppBaseController
                     'package_id'        => $request->package_id,
                     'status'            => 'Active',
                 ]);
+                $user->update(['hotel_id' => $hotel->id]);
             }
 
             // Generate API token
