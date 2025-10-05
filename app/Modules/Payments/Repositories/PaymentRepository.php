@@ -15,11 +15,27 @@ use Exception;
 
 class PaymentRepository
 {
+    /*
     public function dueList($hotelId)
     {
         $data = Booking::with('user')
             ->where('hotel_id', $hotelId)
             ->where('due', '>=', 0)
+            ->get();
+
+        return $data;
+    }
+    */
+    public function dueList($hotelId, $phone)
+    {
+        $data = Booking::with('user')
+            ->where('hotel_id', $hotelId)
+            ->where('due', '>', 0)
+            ->when($phone, function ($query, $phone) {
+                $query->whereHas('user', function ($q) use ($phone) {
+                    $q->where('phone', $phone);
+                });
+            })
             ->get();
 
         return $data;

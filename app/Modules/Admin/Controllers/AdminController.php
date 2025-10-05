@@ -25,6 +25,11 @@ class AdminController extends AppBaseController
         $data = $this->adminRepository->all();
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function hotelList()
+    {
+        $data = $this->adminRepository->hotelList();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
 
     // Update status data
     public function ownerStatusUpdate(AdminRequest $request)

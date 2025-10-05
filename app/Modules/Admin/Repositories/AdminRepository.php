@@ -24,6 +24,12 @@ class AdminRepository
 
         return $data;
     }
+    public function hotelList()
+    {
+        $data = Hotel::with('withdrawMethod')->get();
+
+        return $data;
+    }
     public function store(array $data)
     {
         DB::beginTransaction();

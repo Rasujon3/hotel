@@ -23,6 +23,13 @@ class HomeController extends AppBaseController
     }
 
     // Fetch all data
+    public function popularHotelImages()
+    {
+        $data = $this->homeRepository->popularHotelImages();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+
+    // Fetch all data
     public function popularHotels()
     {
         $data = $this->homeRepository->popularHotels();

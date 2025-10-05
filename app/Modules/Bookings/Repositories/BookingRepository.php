@@ -302,7 +302,8 @@ class BookingRepository
         }
         $roomEndBookingTime = Carbon::parse($room->end_booking_time)->startOfDay();
 
-        if ($room->end_booking_time > $bookingStartDate) {
+//        if ($room->end_booking_time > $bookingStartDate) {
+        if ($roomEndBookingTime > $bookingStartDate) {
             return ['status' => false, 'message' => "Room {$room->room_no} is currently {$room->current_status}."];
         }
 

@@ -59,7 +59,7 @@ class BookingController extends AppBaseController
                 return $this->sendError($existCheck['message'], 404);
             }
 
-            $bookingStartDate = $request->booking_start_date;
+            $bookingStartDate = $room['booking_start_date'];
             $availabilityCheck = $this->bookingRepository->checkRoomAvailability($room['room_id'], $bookingStartDate);
             if (!$availabilityCheck['status']) {
                 return $this->sendError($availabilityCheck['message'], 409);

@@ -4,6 +4,7 @@ use App\Modules\Homes\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/homes')->group(function () {
+    Route::get('/popular-hotels-images', [HomeController::class, 'popularHotelImages'])->name('homes.popular-hotels'); // List data
     Route::get('/popular-hotels', [HomeController::class, 'popularHotels'])->name('homes.popular-hotels'); // List data
     Route::get('/property-type', [HomeController::class, 'propertyType'])->name('homes.property-type'); // List data
     Route::post('/search-by-area', [HomeController::class, 'searchByArea'])->name('homes.search-by-area'); // List data

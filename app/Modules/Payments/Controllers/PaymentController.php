@@ -24,12 +24,13 @@ class PaymentController extends AppBaseController
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
+        $phone = $request->phone;
 
         if (!in_array($hotelId, $userHotelIds,false)) {
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->paymentRepository->dueList($hotelId);
+        $data = $this->paymentRepository->dueList($hotelId, $phone);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     public function dueSearch(PaymentRequest $request)

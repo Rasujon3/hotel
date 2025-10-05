@@ -6,6 +6,7 @@ use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
 use App\Modules\Hotels\Models\Hotel;
+use App\Modules\Hotels\Models\HotelImg;
 use App\Modules\Offers\Models\Offer;
 use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
@@ -20,8 +21,13 @@ use Exception;
 
 class HomeRepository
 {
+    public function popularHotelImages()
+    {
+        return Cache::remember('popular_hotel_images', now()->addMinutes(10), fn() => $this->getPopularHotelImagesData());
+    }
     public function popularHotels()
     {
+//        return $this->getPopularHotelsData();
         return Cache::remember('popular_hotels', now()->addMinutes(10), fn() => $this->getPopularHotelsData());
     }
     public function searchByArea($range, $userLat, $userLong)
@@ -51,9 +57,16 @@ class HomeRepository
 //        return $this->getPropertyTypeData();
         return Cache::remember('property_type', now()->addMinutes(10), fn() => $this->getPropertyTypeData());
     }
+    public function getPopularHotelImagesData()
+    {
+        $data =  HotelImg::with('hotel')
+            ->latest()
+            ->get();
+        return $data;
+    }
     public function getPopularHotelsData()
     {
-        $data =  Hotel::with('ratings')
+        $data =  Hotel::with('ratings', 'images')
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('status', 'Active')
@@ -65,13 +78,14 @@ class HomeRepository
                     'address'       => $hotel->hotel_address,
                     'avg_rating'    => round($hotel->ratings_avg_rating, 1),
                     'rating_count'  => $hotel->ratings_count,
+                    'images'        => $hotel->images,
                 ];
             });
         return $data;
     }
     public function getPropertyTypeData()
     {
-        $hotelCount =  Hotel::where('status', 'Active')->count();
+        $hotelCount = Hotel::where('status', 'Active')->count();
         return [
             'hotel_count' => $hotelCount,
             'name' => 'Hotels'
@@ -302,15 +316,21 @@ class HomeRepository
         $endDate = Carbon::today()->addDays(6);
 
         // 2. Fetch offers where the offer period overlaps with today → next 6 days
-        $offers = Offer::where(function ($query) use ($today, $endDate) {
-            $query->whereBetween('start_date', [$today, $endDate])
-                ->orWhereBetween('end_date', [$today, $endDate])
-                ->orWhere(function ($q) use ($today, $endDate) {
-                    // Covers offers that start before today but end after today
-                    $q->where('start_date', '<=', $today)
-                        ->where('end_date', '>=', $endDate);
-                });
-        })
+        $offers = Offer::with([
+            'hotel' => function ($q) {
+                $q->withAvg('ratings', 'rating')  // ✅ average rating per hotel
+                ->withCount('ratings')          // ✅ rating count per hotel
+                ->with('images');
+            }
+        ])
+            ->where(function ($query) use ($today, $endDate) {
+                $query->whereBetween('start_date', [$today, $endDate])
+                    ->orWhereBetween('end_date', [$today, $endDate])
+                    ->orWhere(function ($q) use ($today, $endDate) {
+                        $q->where('start_date', '<=', $today)
+                            ->where('end_date', '>=', $endDate);
+                    });
+            })
             ->orderBy('start_date', 'asc')
             ->get();
 

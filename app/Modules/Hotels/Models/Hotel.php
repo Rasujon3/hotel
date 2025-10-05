@@ -9,6 +9,7 @@ use App\Modules\Packages\Models\Package;
 use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
 use App\Modules\Rooms\Models\Room;
+use App\Modules\WithdrawalMethods\Models\WithdrawalMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -79,6 +80,11 @@ class Hotel extends Model
             'end_date'   => ['nullable', 'date', 'after_or_equal:start_date', 'required_with:start_date'],
         ];
     }
+    public function getRatingsAvgRatingAttribute($value)
+    {
+        return $value ? number_format($value, 1) : null;
+    }
+
     public function user() : belongsTo
     {
         return $this->belongsTo(User::class,'user_id');
@@ -110,5 +116,9 @@ class Hotel extends Model
     public function popularPlace(): belongsTo
     {
         return $this->belongsTo(PopularPlace::class, 'popular_place_id');
+    }
+    public function withdrawMethod(): hasOne
+    {
+        return $this->hasOne(WithdrawalMethod::class, 'hotel_id');
     }
 }
