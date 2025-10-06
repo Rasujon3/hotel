@@ -25,6 +25,7 @@ Route::prefix('v1/hotels')->middleware('auth:sanctum')->group(function () {
     Route::middleware('roles:owner,receptionist')->group(function () {
         Route::get('/property-type-list', [HotelController::class, 'propertyTypeList'])->name('hotels.propertyTypeList'); // List data
         Route::get('/popular-place-list', [HotelController::class, 'popularPlaceList'])->name('hotels.propertyTypeList'); // List data
+        Route::get('/package-list', [HotelController::class, 'packageList'])->name('hotels.packageList'); // List data
         Route::get('/my-hotel-list', [HotelController::class, 'index'])->name('hotels.list'); // List data
         Route::post('/create', [HotelController::class, 'store'])->name('hotels.store'); // Create data
         Route::get('/view/{hotel}', [HotelController::class, 'show'])->name('hotels.view'); // View data

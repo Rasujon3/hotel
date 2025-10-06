@@ -9,6 +9,7 @@ use App\Modules\Expenses\Models\Expense;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
 use App\Modules\Hotels\Models\PropertyType;
+use App\Modules\Packages\Models\Package;
 use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
@@ -20,6 +21,12 @@ use Exception;
 
 class HotelRepository
 {
+    public function packageList()
+    {
+        $data = Package::get();
+
+        return $data;
+    }
     public function popularPlaceList()
     {
         $data = PopularPlace::get();

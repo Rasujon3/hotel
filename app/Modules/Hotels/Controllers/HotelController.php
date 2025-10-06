@@ -15,6 +15,11 @@ class HotelController extends AppBaseController
         $this->hotelRepository = $hotelRepo;
     }
     // Fetch all data
+    public function packageList()
+    {
+        $data = $this->hotelRepository->packageList();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     public function popularPlaceList()
     {
         $data = $this->hotelRepository->popularPlaceList();
