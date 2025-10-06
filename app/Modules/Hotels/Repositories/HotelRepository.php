@@ -8,6 +8,7 @@ use App\Modules\Bookings\Models\Booking;
 use App\Modules\Expenses\Models\Expense;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
+use App\Modules\Hotels\Models\PropertyType;
 use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
 use App\Services\S3Service;
@@ -18,6 +19,12 @@ use Exception;
 
 class HotelRepository
 {
+    public function propertyTypeList()
+    {
+        $data = PropertyType::latest()->get();
+
+        return $data;
+    }
     public function all($userId, $userTypeId)
     {
         $data = [];
@@ -135,6 +142,7 @@ class HotelRepository
             $hotel->hotel_description = $data['hotel_description'] ?? $hotel->hotel_description;
             $hotel->booking_percentage = $data['booking_percentage'] ?? $hotel->booking_percentage;
             $hotel->popular_place_id = $data['popular_place_id'] ?? $hotel->popular_place_id;
+            $hotel->property_type_id = $data['property_type_id'] ?? $hotel->property_type_id;
             $hotel->system_commission = $data['system_commission'] ?? $hotel->system_commission;
             $hotel->check_in_time = $checkIn;
             $hotel->check_out_time = $checkOut;

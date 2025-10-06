@@ -7,6 +7,7 @@ use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
+use App\Modules\Hotels\Models\PropertyType;
 use App\Modules\Offers\Models\Offer;
 use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Ratings\Models\Rating;
@@ -85,20 +86,25 @@ class HomeRepository
     }
     public function getPropertyTypeData()
     {
-        $hotelCount = Hotel::where('status', 'Active')->count();
-        return [
-            'hotel_count' => $hotelCount,
-            'name' => 'Hotels'
-        ];
+        return PropertyType::where('status', 'Active')
+            ->withCount(['hotels' => fn($q) => $q->where('status', 'Active')])
+            ->orderBy('hotels_count', 'desc')
+            ->get()
+            ->map(fn($type) => [
+                'id' => $type->id,
+                'name' => $type->name,
+                'image_url' => $type->image_url,
+                'count' => $type->hotels_count,
+            ]);
     }
     public function hotelDetails($hotelId)
     {
-        # return $this->getHotelDetailsData($hotelId);
-        return Cache::remember('hotel_details', now()->addMinutes(10), fn() => $this->getHotelDetailsData($hotelId));
+        return $this->getHotelDetailsData($hotelId);
+//        return Cache::remember('hotel_details', now()->addMinutes(10), fn() => $this->getHotelDetailsData($hotelId));
     }
     public function getHotelDetailsData($hotelId)
     {
-        $data =  Hotel::with('ratings', 'facilities', 'floor', 'images')
+        $data =  Hotel::with('buildings', 'ratings', 'facilities', 'floor', 'images')
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('id', $hotelId)
@@ -116,7 +122,10 @@ class HomeRepository
                     'avg_rating'    => $avgRating,
                     'rating_count'  => $hotel->ratings_count,
                     'rating_status' => $this->getRatingStatus($avgRating),
+                    'check_in_time' => $hotel->check_in_time,
+                    'check_out_time' => $hotel->check_out_time,
                     'facilities'    => $hotel->facilities,
+                    'buildings'    => $hotel->buildings,
                     'floor'    => $hotel->floor,
                     'images'    => $hotel->images,
                 ];
@@ -139,10 +148,11 @@ class HomeRepository
             return 'No Rating';
         }
     }
-    public function roomDetails($hotelId, $floorId, $bookingStartDate = null, $bookingEndDate = null)
+    public function roomDetails($hotelId, $buildingId, $floorId, $bookingStartDate = null, $bookingEndDate = null)
     {
         // Count available rooms considering date range
         $availableRooms = Room::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('status', 'Active')
             ->where(function ($query) use ($bookingStartDate, $bookingEndDate) {
                 $query->whereNull('start_booking_time')

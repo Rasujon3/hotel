@@ -3,6 +3,7 @@
 namespace App\Modules\Hotels\Models;
 
 use App\Models\User;
+use App\Modules\Buildings\Models\Building;
 use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Packages\Models\Package;
@@ -67,6 +68,7 @@ class Hotel extends Model
             'hotel_description' => 'nullable|string',
             'booking_percentage' => 'nullable|numeric|min:1|max:100',
             'popular_place_id'    => 'nullable|integer|exists:popular_places,id',
+            'property_type_id'    => 'required|integer|exists:property_types,id',
             'system_commission' => 'required|numeric|min:1|max:99999999.99',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
@@ -120,5 +122,15 @@ class Hotel extends Model
     public function withdrawMethod(): hasOne
     {
         return $this->hasOne(WithdrawalMethod::class, 'hotel_id');
+    }
+
+    public function propertyType(): belongsTo
+    {
+        return $this->belongsTo(PropertyType::class, 'property_type_id');
+    }
+
+    public function buildings(): hasMany
+    {
+        return $this->hasMany(Building::class, 'hotel_id');
     }
 }

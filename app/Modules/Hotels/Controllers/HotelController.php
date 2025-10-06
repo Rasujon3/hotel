@@ -15,6 +15,11 @@ class HotelController extends AppBaseController
         $this->hotelRepository = $hotelRepo;
     }
     // Fetch all data
+    public function propertyTypeList()
+    {
+        $data = $this->hotelRepository->propertyTypeList();
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     public function index()
     {
         $userId = getUser()?->id;

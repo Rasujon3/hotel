@@ -63,11 +63,12 @@ class HomeController extends AppBaseController
     public function roomDetails(HomeRequest $request)
     {
         $hotelId = $request->hotel_id;
+        $buildingId = $request->building_id;
         $floorId = $request->floor_id;
         $bookingStartDate = $request->booking_start_date;
         $bookingEndDate = $request->booking_end_date;
 
-        $data = $this->homeRepository->roomDetails($hotelId, $floorId, $bookingStartDate, $bookingEndDate);
+        $data = $this->homeRepository->roomDetails($hotelId, $buildingId, $floorId, $bookingStartDate, $bookingEndDate);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     public function PopularPlaces()
