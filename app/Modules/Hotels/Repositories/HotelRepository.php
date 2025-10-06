@@ -9,6 +9,7 @@ use App\Modules\Expenses\Models\Expense;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Hotels\Models\HotelImg;
 use App\Modules\Hotels\Models\PropertyType;
+use App\Modules\PopularPlaces\Models\PopularPlace;
 use App\Modules\Receptionists\Models\Receptionist;
 use App\Modules\Rooms\Models\Room;
 use App\Services\S3Service;
@@ -19,6 +20,12 @@ use Exception;
 
 class HotelRepository
 {
+    public function popularPlaceList()
+    {
+        $data = PopularPlace::get();
+
+        return $data;
+    }
     public function propertyTypeList()
     {
         $data = PropertyType::latest()->get();
