@@ -14,7 +14,7 @@ Route::prefix('/v1')->middleware('api')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('user.logout')->middleware(['auth:sanctum']);
 });
     Route::post('/register', [RegisterController::class, 'register']);
-    Route::get('/user-info', [RegisterController::class, 'userInfo'])->name('user.info')->middleware(['auth:sanctum', 'roles:user']);
+    Route::get('/user-info', [RegisterController::class, 'userInfo'])->name('user.info')->middleware(['auth:sanctum', 'roles:user,owner,receptionist']);
     Route::post('/user-profile-update', [RegisterController::class, 'userProfileUpdate'])->name('user.profile.update')->middleware(['auth:sanctum', 'roles:user']);
     Route::post('/change-password', [RegisterController::class, 'changePassword'])->name('user.change-password')->middleware(['auth:sanctum', 'roles:user']);
 

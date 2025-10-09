@@ -8,6 +8,7 @@ use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Validation\Rule;
@@ -150,6 +151,11 @@ class User extends Authenticatable
         ];
 
         return $rules;
+    }
+
+    public function hotel(): HasOne
+    {
+        return $this->hasOne(Hotel::class);
     }
 
     public function hotels(): HasMany
