@@ -67,21 +67,24 @@ class HomeRepository
     }
     public function getPopularHotelsData()
     {
-        $data =  Hotel::with('ratings', 'images')
+        $data = Hotel::with('ratings', 'images')
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('status', 'Active')
-            ->get()
-            ->map(function ($hotel) {
-                return [
-                    'id'            => $hotel->id,
-                    'name'          => $hotel->hotel_name,
-                    'address'       => $hotel->hotel_address,
-                    'avg_rating'    => round($hotel->ratings_avg_rating, 1),
-                    'rating_count'  => $hotel->ratings_count,
-                    'images'        => $hotel->images,
-                ];
-            });
+            ->paginate(10);
+
+        // map on the paginator items
+        $data->getCollection()->transform(function ($hotel) {
+            return [
+                'id'           => $hotel->id,
+                'name'         => $hotel->hotel_name,
+                'address'      => $hotel->hotel_address,
+                'avg_rating'   => round($hotel->ratings_avg_rating, 1),
+                'rating_count' => $hotel->ratings_count,
+                'images'       => $hotel->images,
+            ];
+        });
+
         return $data;
     }
     public function getPropertyTypeData()
@@ -341,7 +344,7 @@ class HomeRepository
     }
     public function getPopularPlacesData()
     {
-        $data =  PopularPlace::where('status', 'Active')->get();
+        $data =  PopularPlace::where('status', 'Active')->paginate(10);
         return $data;
     }
     public function weeklyOffer()
@@ -367,7 +370,7 @@ class HomeRepository
                     });
             })
             ->orderBy('start_date', 'asc')
-            ->get();
+            ->paginate(10);
 
         // 3. Prepare heading text (e.g., "Save on stays for 20 September - 27 September")
         $heading = "Save on stays for " . $today->format('d F') . " - " . $endDate->format('d F');
