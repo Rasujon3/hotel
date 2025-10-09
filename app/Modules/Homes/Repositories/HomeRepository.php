@@ -104,33 +104,58 @@ class HomeRepository
     }
     public function getHotelDetailsData($hotelId)
     {
-        $data =  Hotel::with('buildings', 'ratings', 'facilities', 'floor', 'images')
+        $hotel = Hotel::with([
+            'facilities',
+            'images',
+            'ratings',
+            'buildings' => function ($q) {
+                $q->with([
+                    'images',
+                    'floors' => function ($q2) {
+                        $q2->with('images');
+                    }
+                ])->where('status', 'Active');
+            },
+        ])
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('id', $hotelId)
             ->where('status', 'Active')
-            ->get()
-            ->map(function ($hotel) {
-                $avgRating = round($hotel->ratings_avg_rating, 1);
+            ->first();
+
+        $avgRating = round($hotel->ratings_avg_rating ?? 0, 1);
+
+        return [
+            'id'            => $hotel->id,
+            'name'          => $hotel->hotel_name,
+            'address'       => $hotel->hotel_address,
+            'description'   => $hotel->hotel_description,
+            'lat'           => $hotel->lat,
+            'long'          => $hotel->long,
+            'avg_rating'    => $avgRating,
+            'rating_count'  => $hotel->ratings_count,
+            'rating_status' => $this->getRatingStatus($avgRating),
+            'check_in_time' => $hotel->check_in_time,
+            'check_out_time' => $hotel->check_out_time,
+            'facilities'    => $hotel->facilities,
+            'images'        => $hotel->images,
+            'buildings'     => $hotel->buildings->map(function ($building) {
                 return [
-                    'id'            => $hotel->id,
-                    'name'          => $hotel->hotel_name,
-                    'address'       => $hotel->hotel_address,
-                    'description'   => $hotel->hotel_description,
-                    'lat'           => $hotel->lat,
-                    'long'          => $hotel->long,
-                    'avg_rating'    => $avgRating,
-                    'rating_count'  => $hotel->ratings_count,
-                    'rating_status' => $this->getRatingStatus($avgRating),
-                    'check_in_time' => $hotel->check_in_time,
-                    'check_out_time' => $hotel->check_out_time,
-                    'facilities'    => $hotel->facilities,
-                    'buildings'    => $hotel->buildings,
-                    'floor'    => $hotel->floor,
-                    'images'    => $hotel->images,
+                    'id'     => $building->id,
+                    'name'   => $building->name,
+                    'status' => $building->status,
+                    'images' => $building->images,
+                    'floors' => $building->floors->map(function ($floor) {
+                        return [
+                            'id'     => $floor->id,
+                            'name'   => $floor->name,
+                            'status' => $floor->status,
+                            'images' => $floor->images,
+                        ];
+                    }),
                 ];
-            });
-        return $data;
+            }),
+        ];
     }
     private function getRatingStatus(float $avgRating): string
     {
