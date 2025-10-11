@@ -214,6 +214,7 @@ class HotelRepository
             }
 
             DB::commit();
+            $hotel = Hotel::with('images')->where('id', $hotel->id)->first();
             return $hotel;
         } catch (Exception $e) {
             DB::rollBack();

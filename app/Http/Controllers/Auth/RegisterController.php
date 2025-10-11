@@ -136,7 +136,7 @@ class RegisterController extends AppBaseController
         DB::beginTransaction();
         try {
             $userId = auth()->user()->id;
-            $user = User::with('hotel')->where('id', $userId)->first();
+            $user = User::with('hotel', 'hotel.images')->where('id', $userId)->first();
 
             DB::commit();
 

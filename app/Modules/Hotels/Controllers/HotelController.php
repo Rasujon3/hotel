@@ -100,9 +100,11 @@ class HotelController extends AppBaseController
         }
 
         $checkEmailExist = $this->hotelRepository->checkEmailExist($userId, $email);
+        /*
         if ($checkEmailExist) {
             return $this->sendError('Email already exist.', 409);
         }
+        */
 
         $updated = $this->hotelRepository->update($data, $request->all(), $userId);
         if (!$updated) {
