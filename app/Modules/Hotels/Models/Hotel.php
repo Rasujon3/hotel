@@ -70,6 +70,9 @@ class Hotel extends Model
             'popular_place_id'    => 'nullable|integer|exists:popular_places,id',
             'property_type_id'    => 'required|integer|exists:property_types,id',
             'system_commission' => 'required|numeric|min:1|max:99999999.99',
+            'status'      => 'required|in:Active,Inactive',
+            'check_in_time'      => 'required',
+            'check_out_time'      => 'required',
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ];

@@ -160,6 +160,7 @@ class HotelRepository
             $hotel->system_commission = $data['system_commission'] ?? $hotel->system_commission;
             $hotel->check_in_time = $checkIn;
             $hotel->check_out_time = $checkOut;
+            $hotel->status = $data['status'] ?? $hotel->status;
             $hotel->update();
 
             if (

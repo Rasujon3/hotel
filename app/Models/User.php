@@ -48,6 +48,10 @@ class User extends Authenticatable
         'hotel_id',
         'image_url',
         'image_path',
+        'otp',
+        'otp_expires_at',
+        'otp_request_count',
+        'otp_last_request_date',
     ];
 
     /**
@@ -73,6 +77,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'otp_enabled' => 'boolean',
+            'otp_last_request_date' => 'datetime',
+            'otp_expires_at' => 'datetime', // if you have this field
         ];
     }
 

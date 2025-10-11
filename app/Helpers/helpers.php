@@ -36,3 +36,27 @@ if (! function_exists('getUserHotelIds')) {
         return [];
     }
 }
+if (!function_exists('formatBangladeshPhone')) {
+    /**
+     * Format Bangladeshi phone number (e.g., 017xxxxxxx → 88017xxxxxxx)
+     */
+    function formatBangladeshPhone(string $phone): string
+    {
+        // Remove all non-numeric characters
+        $phone = preg_replace('/\D/', '', $phone);
+
+        // If number starts with '880' already, keep it
+        if (str_starts_with($phone, '880')) {
+            return $phone;
+        }
+
+        // If starts with '0' and total 11 digits (e.g., 017XXXXXXXX)
+        if (strlen($phone) === 11 && str_starts_with($phone, '0')) {
+            return '88' . $phone;
+        }
+
+        // If invalid length, return as is or handle error
+        return $phone;
+    }
+}
+

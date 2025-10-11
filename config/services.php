@@ -36,4 +36,12 @@ return [
     ],
     'bed_icons' => json_decode(env('BED_ICONS', '{}'), true),
 
+    'icombd' => [
+        'baseurl' => env('ICOMBD_BASEURL', 'http://api.icombd.com/api/v2/sendsms/plaintext'),
+        'username' => env('ICOMBD_USERNAME'),
+        'password' => env('ICOMBD_PASSWORD'),
+        'sender'   => env('ICOMBD_SENDER'),
+    ],
+
+
 ];

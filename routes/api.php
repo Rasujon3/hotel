@@ -20,8 +20,13 @@ Route::prefix('/v1')->middleware('api')->group(function () {
 
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetRequest']); // OTP or Email
     Route::post('/verify-reset-otp', [ForgotPasswordController::class, 'verifyResetOtp']); // OTP verification
-    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']); // Reset via OTP
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPasswords']); // Reset via OTP
     Route::post('/password/reset', [ForgotPasswordController::class, 'resetPasswordWithToken']); // Reset via email token
+
+    Route::post('/auth/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+    Route::post('/auth/verify-otp', [ForgotPasswordController::class, 'verifyOtp']);
+    Route::post('/auth/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+
 });
 
 Route::get('/migrate', function(){
