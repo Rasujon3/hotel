@@ -326,16 +326,39 @@ class HomeRepository
             ->withCount('ratings')
             ->where('popular_place_id', $popularPlaceId)
             ->where('status', 'Active')
-            ->get()
-            ->map(function ($hotel) {
-                return [
-                    'id'            => $hotel->id,
-                    'name'          => $hotel->hotel_name,
-                    'address'       => $hotel->hotel_address,
-                    'avg_rating'    => round($hotel->ratings_avg_rating, 1),
-                    'rating_count'  => $hotel->ratings_count,
-                ];
-            });
+            ->paginate(10);
+        // map on the paginator items
+        $data->getCollection()->transform(function ($hotel) {
+            return [
+                'id'           => $hotel->id,
+                'name'         => $hotel->hotel_name,
+                'address'      => $hotel->hotel_address,
+                'avg_rating'   => round($hotel->ratings_avg_rating, 1),
+                'rating_count' => $hotel->ratings_count,
+                'images'       => $hotel->images,
+            ];
+        });
+        return $data;
+    }
+    public function hotelByPropertyType($propertyTypeId)
+    {
+        $data =  Hotel::with('ratings')
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings')
+            ->where('property_type_id', $propertyTypeId)
+            ->where('status', 'Active')
+            ->paginate(10);
+        // map on the paginator items
+        $data->getCollection()->transform(function ($hotel) {
+            return [
+                'id'           => $hotel->id,
+                'name'         => $hotel->hotel_name,
+                'address'      => $hotel->hotel_address,
+                'avg_rating'   => round($hotel->ratings_avg_rating, 1),
+                'rating_count' => $hotel->ratings_count,
+                'images'       => $hotel->images,
+            ];
+        });
         return $data;
     }
     public function popularPlaces()

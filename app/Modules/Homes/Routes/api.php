@@ -13,7 +13,7 @@ Route::prefix('v1/homes')->group(function () {
     Route::get('/popular-places', [HomeController::class, 'PopularPlaces'])->name('homes.popular-places'); // List data
     Route::post('/hotels-by-popular-place', [HomeController::class, 'hotelsByPopularPlace'])->name('homes.hotels-by-popular-place'); // List data
     Route::get('/weekly-offers', [HomeController::class, 'weeklyOffer'])->name('homes.weekly-offers'); // List data
-    Route::get('/property-type', [HomeController::class, 'propertyType'])->name('homes.property-type'); // List data
+    Route::post('/hotel-by-property-type', [HomeController::class, 'hotelByPropertyType'])->name('homes.hotel-by-property-type');
     # Route::post('/create', [HomeController::class, 'store'])->name('homes.store'); // Create data
     # Route::get('/view/{facility}', [HomeController::class, 'show'])->name('homes.view'); // View data
     # Route::post('/update/{facility}', [HomeController::class, 'update'])->name('homes.update'); // Update data

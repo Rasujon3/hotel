@@ -68,14 +68,18 @@ class HomeRequest extends FormRequest
             return Home::hotelsByPopularPlaceRules();
         }
 
+        if ($routeName === 'homes.hotel-by-property-type') {
+            return Home::hotelByPropertyType();
+        }
+
         /*
         if ($routeName === 'ratings.list') {
             return Rating::listRules();
         }
         */
 
-        $id = $this->route('rating') ?: null;
+        # $id = $this->route('rating') ?: null;
 
-        return Rating::rules($id);
+        # return Rating::rules($id);
     }
 }

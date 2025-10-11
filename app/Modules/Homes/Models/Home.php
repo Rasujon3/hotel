@@ -71,6 +71,12 @@ class Home extends Model
             'popular_place_id' => 'required|numeric|exists:popular_places,id',
         ];
     }
+    public static function hotelByPropertyType()
+    {
+        return [
+            'property_type_id' => 'required|numeric|exists:property_types,id',
+        ];
+    }
     public function user() : belongsTo
     {
         return $this->belongsTo(User::class,'user_id');

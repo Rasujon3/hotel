@@ -83,6 +83,13 @@ class HomeController extends AppBaseController
         $data = $this->homeRepository->hotelsByPopularPlace($popularPlaceId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function hotelByPropertyType(HomeRequest $request)
+    {
+        $propertyTypeId = $request->property_type_id;
+
+        $data = $this->homeRepository->hotelByPropertyType($propertyTypeId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     public function weeklyOffer()
     {
         $data = $this->homeRepository->weeklyOffer();
