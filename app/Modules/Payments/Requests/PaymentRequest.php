@@ -61,6 +61,10 @@ class PaymentRequest extends FormRequest
             return Payment::collectDueRules();
         }
 
+        if ($routeName === 'payments.user-collect-due') {
+            return Payment::userCollectDueRules();
+        }
+
         if ($routeName === 'rooms.update') {
             return Room::updateRules();
         }

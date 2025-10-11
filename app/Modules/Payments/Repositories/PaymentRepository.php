@@ -108,6 +108,72 @@ class PaymentRepository
             return null;
         }
     }
+    public function userCollectDue(array $data, $userId)
+    {
+        DB::beginTransaction();
+        try {
+            // 1. booking amount update
+            $booking = Booking::where('id', $data['booking_id'])
+                #->where('user_id', $userId)
+                ->where('hotel_id', $data['hotel_id'])
+                ->first();
+
+            $calculateDue = $booking->due - $data['amount'];
+            $due = $calculateDue <= 0 ? 0 : $calculateDue;
+            $paid = $booking->paid + $data['amount'];
+
+            $booking->update([
+                'due' => $due,
+                'paid' => $paid,
+            ]);
+
+            // 2. Save payment
+            Payment::create([
+                'booking_id' => $data['booking_id'],
+                'payment_type' => $data['payment_type'],
+                'payment_method' => $data['payment_method'],
+                'acc_no' => $data['payment_method'],
+                'amount' => $data['amount'],
+                'pay_type' => $data['pay_type'],
+                'transaction_id' => $data['transaction_id'],
+                'reference' => $data['reference'],
+                'created_by' => $userId,
+            ]);
+
+            // 4. Balance add on hotels table
+            $hotel = Hotel::where('id', $data['hotel_id'])->first();
+            $calculateSysCom = $this->calculateSysCom($data['amount'], $hotel->system_commission);
+
+            $newBalance = $hotel->balance + $data['amount'] - $calculateSysCom;
+            $hotel->update(['balance' => $newBalance]);
+
+            DB::commit();
+            /*
+            $message1 = "You Collected BDT {$amount} By Cash";
+            $message2 = "Less Amount BDT {$due}";
+            $message3 = ".";
+            $message = $message1 . $due > 0 ? $message2 : $message3;
+            */
+            return $this->findBooking($booking->id);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Error in userCollectDue data: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            # return $e->getMessage();
+            return null;
+        }
+    }
+    public function calculateSysCom($total, $sysCom)
+    {
+        return ceil(($total * $sysCom) / 100);
+    }
 
     public function findBooking($id)
     {

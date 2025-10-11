@@ -36,8 +36,8 @@ class BookingDetail extends Model
     ];
 
     protected $hidden = [
-        'booking_start_date',
-        'booking_end_date',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

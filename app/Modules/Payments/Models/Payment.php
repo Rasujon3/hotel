@@ -81,6 +81,22 @@ class Payment extends Model
         ];
     }
 
+    public static function userCollectDueRules($id = null)
+    {
+        return [
+            #'user_id' => 'required|exists:users,id',
+            'hotel_id' => 'required|exists:hotels,id',
+            'booking_id' => 'required|exists:bookings,id',
+            'payment_type' => 'required|in:Online,Offline',
+            'payment_method' => 'required|in:bkash',
+            'acc_no' => 'required|string',
+            'amount' => 'required|numeric|min:1|max:99999999.99',
+            'pay_type' => 'required|in:booking,additional',
+            'transaction_id' => 'required|string|max:100',
+            'reference' => 'nullable|string',
+        ];
+    }
+
     public static function updateRules($id = null)
     {
         return [

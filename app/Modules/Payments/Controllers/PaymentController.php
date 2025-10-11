@@ -73,6 +73,33 @@ class PaymentController extends AppBaseController
         }
         return $this->sendResponse($data, 'Collect due successfully.');
     }
+    public function userCollectDue(PaymentRequest $request)
+    {
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
+        # $userTypeId = getUser()?->user_type_id;
+        $hotelId = $request->hotel_id;
+        # $userId = $request->user_id;
+        $bookingId = $request->booking_id;
+        $amount = $request->amount;
+
+        /*
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
+        }
+        */
+
+        $checkExist = $this->paymentRepository->checkDueZero($bookingId, $hotelId);
+        if ($checkExist) {
+            return $this->sendError('No due found.', 404);
+        }
+
+        $data = $this->paymentRepository->userCollectDue($request->all(), $user?->id);
+        if (!$data) {
+            return $this->sendError('Something went wrong!!! [PC-01]', 500);
+        }
+        return $this->sendResponse($data, 'Collect due successfully.');
+    }
     // Store data
     public function store(PaymentRequest $request)
     {

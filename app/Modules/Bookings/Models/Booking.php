@@ -134,6 +134,12 @@ class Booking extends Model
             'phone'     => 'required|exists:users,phone',
         ];
     }
+    public static function userBookingsRules()
+    {
+        return [
+            'booking_id' => 'nullable|exists:bookings,id',
+        ];
+    }
 
     public function user() : belongsTo
     {

@@ -197,4 +197,13 @@ class BookingController extends AppBaseController
 
         return $this->sendResponse($store, 'Checked-Out status updated successfully!');
     }
+    public function userBookings(BookingRequest $request)
+    {
+        $userId = getUser()?->id;
+        $bookingId = $request->booking_id ?? null;
+
+        $data = $this->bookingRepository->userBookings($userId, $bookingId);
+
+        return $this->sendResponse($data, 'Data retrieved successfully!');
+    }
 }
