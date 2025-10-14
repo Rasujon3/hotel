@@ -3,6 +3,7 @@
 namespace App\Modules\Bookings\Models;
 
 use App\Models\User;
+use App\Modules\Buildings\Models\Building;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Payments\Models\Payment;
@@ -25,6 +26,7 @@ class BookingDetail extends Model
         'user_id',
         'booking_id',
         'hotel_id',
+        'building_id',
         'floor_id',
         'room_id',
         'booking_start_date',
@@ -121,6 +123,10 @@ class BookingDetail extends Model
     public function hotel() : belongsTo
     {
         return $this->belongsTo(Hotel::class,'hotel_id');
+    }
+    public function building() : belongsTo
+    {
+        return $this->belongsTo(Building::class,'building_id');
     }
     public function floor() : belongsTo
     {

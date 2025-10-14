@@ -3,6 +3,7 @@
 namespace App\Modules\Buildings\Models;
 
 use App\Models\User;
+use App\Modules\Bookings\Models\BookingDetail;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 
@@ -76,6 +78,10 @@ class Building extends Model
     public function updatedBy() : belongsTo
     {
         return $this->belongsTo(User::class,'updated_by');
+    }
+    public function bookingDetail(): HasMany
+    {
+        return $this->hasMany(BookingDetail::class, 'building_id');
     }
     public function floors(): HasMany
     {

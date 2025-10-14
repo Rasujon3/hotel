@@ -67,6 +67,7 @@ class BookingRepository
                     'booking_id' => $booking->id,
                     'user_id' => $userId,
                     'hotel_id' => $room['hotel_id'],
+                    'building_id' => $room['building_id'],
                     'floor_id' => $room['floor_id'],
                     'room_id' => $room['room_id'],
                     'booking_start_date' => $room['booking_start_date'] . $hotel->check_in_time,
