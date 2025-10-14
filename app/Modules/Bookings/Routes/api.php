@@ -17,6 +17,7 @@ Route::prefix('v1/bookings')->middleware(['auth:sanctum'])->group(function () {
 Route::prefix('v1/bookings')->middleware('auth:sanctum')->group(function () {
     // ✅ Routes accessible by both owner & receptionist
     Route::middleware('roles:owner,receptionist')->group(function () {
+        Route::get('/list', [BookingController::class, 'index'])->name('bookings.list'); // List data
         Route::post('/search-booking-by-user', [BookingController::class, 'searchBookingByUser'])->name('bookings.search-booking-by-user');
         Route::post('/update-status', [BookingController::class, 'updateStatus'])->name('bookings.update-status');
         Route::post('/update-check-in-status', [BookingController::class, 'updateCheckInStatus'])->name('bookings.update-check-in-status');

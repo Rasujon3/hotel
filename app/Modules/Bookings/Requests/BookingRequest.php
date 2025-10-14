@@ -49,7 +49,7 @@ class BookingRequest extends FormRequest
         $areaId = $this->route('area') ?: null;
         */
 
-        if ($routeName === 'rooms.list') {
+        if ($routeName === 'bookings.list') {
             return Booking::listRules();
         }
 

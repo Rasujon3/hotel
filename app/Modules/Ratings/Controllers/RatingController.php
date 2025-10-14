@@ -21,11 +21,12 @@ class RatingController extends AppBaseController
     }
 
     // Fetch all data
-    public function index()
+    public function index(RatingRequest $request)
     {
         $userId = getUser()?->id;
+        $hotelId = $request->hotel_id ?? null;
 
-        $data = $this->ratingRepository->all($userId);
+        $data = $this->ratingRepository->all($userId, $hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
@@ -35,11 +36,15 @@ class RatingController extends AppBaseController
         $userId = getUser()?->id;
         $hotelId = $request->hotel_id;
         $userTypeId = getUser()?->user_type_id;
-        $name = $request->name;
 
         $checkValid = $this->ratingRepository->checkValid($userId, $hotelId, $userTypeId);
         if ($checkValid) {
             return $this->sendError('Already added rating for this hotel.', 409);
+        }
+
+        $checkBookingStatus = $this->ratingRepository->checkBookingStatus($userId, $hotelId);
+        if (!$checkBookingStatus) {
+            return $this->sendError('You are not eligible for review this hotel.', 409);
         }
 
         $store = $this->ratingRepository->store($request->all(),$userId);
@@ -73,6 +78,11 @@ class RatingController extends AppBaseController
         $data = $this->ratingRepository->find($id, $userId);
         if (!$data) {
             return $this->sendError('Data not found');
+        }
+
+        $checkValid = $this->ratingRepository->checkValid($userId, $hotelId);
+        if ($checkValid) {
+            return $this->sendError('Already added rating for this hotel.', 409);
         }
 
         $updated = $this->ratingRepository->update($data, $request->all(), $userId);

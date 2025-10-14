@@ -22,6 +22,7 @@ class Rating extends Model
         'user_id',
         'hotel_id',
         'rating',
+        'description',
     ];
 
     protected $casts = [
@@ -51,12 +52,13 @@ class Rating extends Model
                     }
                 },
             ],
+            'description' => 'nullable|string|max:1000',
         ];
     }
     public static function listRules()
     {
         return [
-            'user_id' => 'required|string|max:191|exists:users,id',
+            'hotel_id' => 'nullable|string|exists:hotels,id',
         ];
     }
     public function user() : belongsTo

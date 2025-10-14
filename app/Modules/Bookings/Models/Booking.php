@@ -90,7 +90,6 @@ class Booking extends Model
     {
         return [
             'hotel_id'    => 'required|exists:hotels,id',
-            'floor_id'    => 'required|exists:floors,id',
         ];
     }
 

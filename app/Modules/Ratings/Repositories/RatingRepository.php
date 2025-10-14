@@ -2,6 +2,7 @@
 
 namespace App\Modules\Ratings\Repositories;
 
+use App\Modules\Bookings\Models\Booking;
 use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
@@ -15,11 +16,17 @@ use Exception;
 
 class RatingRepository
 {
-    public function all($userId)
+    public function all($userId, $hotelId = null)
     {
-        $data = Rating::with('hotel')
-            ->where('user_id', $userId)
-            ->get();
+        $query = Rating::with('hotel', 'user');
+
+        if ($hotelId) {
+            $query->where('hotel_id', $hotelId);
+        } else {
+            $query->where('user_id', $userId);
+        }
+
+        $data = $query->get();
 
         return $data;
     }
@@ -104,6 +111,16 @@ class RatingRepository
     {
         $checkValid = Rating::where('user_id', $userId)
             ->where('hotel_id', $hotelId)
+            ->exists();
+
+        return $checkValid;
+    }
+    public function checkBookingStatus($userId, $hotelId)
+    {
+        $checkValid = Booking::where('user_id', $userId)
+            ->where('hotel_id', $hotelId)
+            ->where('status', '!=', 'pending')
+            ->where('status', '!=', 'confirmed')
             ->exists();
 
         return $checkValid;

@@ -18,11 +18,10 @@ use Exception;
 
 class BookingRepository
 {
-    public function all($userId, $hotelId, $floorId)
+    public function all($hotelId)
     {
-        $data = Room::with('images','hotel', 'floor')
+        $data = Booking::with('bookingDetails', 'bookingDetails.room', 'bookingDetails.hotel', 'user')
             ->where('hotel_id', $hotelId)
-            ->where('floor_id', $floorId)
             ->get();
 
         return $data;

@@ -21,16 +21,16 @@ class BookingController extends AppBaseController
     // Fetch all data
     public function index(BookingRequest $request)
     {
-        $userId = getUser()?->id;
+        $user = getUser();
+        $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
-        $floorId = $request->floor_id;
+        $buildingId = $request->building_id;
 
-        $checkExist = $this->bookingRepository->checkExist($userId, $hotelId, $floorId);
-        if (!$checkExist) {
-            return $this->sendError('No data found.', 404);
+        if (!in_array($hotelId, $userHotelIds,false)) {
+            return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->bookingRepository->all($userId, $hotelId, $floorId);
+        $data = $this->bookingRepository->all($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
     // Store data

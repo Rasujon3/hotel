@@ -54,11 +54,10 @@ class RatingRequest extends FormRequest
             return Rating::rules();
         }
 
-        /*
         if ($routeName === 'ratings.list') {
             return Rating::listRules();
         }
-        */
+
 
         $id = $this->route('rating') ?: null;
 
