@@ -7,6 +7,7 @@ use App\Modules\Floors\Models\Floor;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Rooms\Models\Room;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -90,6 +91,26 @@ class BookingDetail extends Model
             'images' => 'nullable|array|min:1',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
+    }
+
+    public function getBookingStartDateAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->format('Y-m-d h:i A') : null;
+    }
+
+    public function getBookingEndDateAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->format('Y-m-d h:i A') : null;
+    }
+
+    public function getCheckInAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->format('Y-m-d h:i A') : null;
+    }
+
+    public function getCheckOutAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->format('Y-m-d h:i A') : null;
     }
 
     public function user() : belongsTo
