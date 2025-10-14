@@ -62,6 +62,7 @@ class Booking extends Model
             // Rooms array
             'rooms'                        => ['required', 'array', 'min:1'],
             'rooms.*.hotel_id'             => ['required', 'integer', 'exists:hotels,id'],
+            'rooms.*.building_id'          => ['required', 'integer', 'exists:buildings,id'],
             'rooms.*.floor_id'             => ['nullable', 'integer', 'exists:floors,id'],
             'rooms.*.room_id'              => ['required', 'integer', 'exists:rooms,id'],
             'rooms.*.day_count'            => ['required', 'integer', 'min:1'],

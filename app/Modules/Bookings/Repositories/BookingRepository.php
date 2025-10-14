@@ -43,6 +43,8 @@ class BookingRepository
     {
         DB::beginTransaction();
         try {
+            $hotel = Hotel::where('id', $hotelId)->first();
+
             // 1. Create booking
             $booking = Booking::create([
                 'user_id' => $userId,
@@ -67,8 +69,8 @@ class BookingRepository
                     'hotel_id' => $room['hotel_id'],
                     'floor_id' => $room['floor_id'],
                     'room_id' => $room['room_id'],
-                    'booking_start_date' => $room['booking_start_date'],
-                    'booking_end_date' => $room['booking_end_date'],
+                    'booking_start_date' => $room['booking_start_date'] . $hotel->check_in_time,
+                    'booking_end_date' => $room['booking_end_date'] . $hotel->check_out_time,
                     'check_in' => $room['check_in'] ?? null,
                     'check_out' => $room['check_out'] ?? null,
                     'day_count' => $room['day_count'],
@@ -78,8 +80,8 @@ class BookingRepository
                 // ii. Update the corresponding room status and booking times
                 Room::where('id', $room['room_id'])
                     ->update([
-                        'start_booking_time' => $room['booking_start_date'],
-                        'end_booking_time'   => $room['booking_end_date'],
+                        'start_booking_time' => $room['booking_start_date'] . " " . $hotel->check_in_time,
+                        'end_booking_time'   => $room['booking_end_date'] . " " . $hotel->check_out_time,
                         'current_status'     => 'booked',
                     ]);
             }
@@ -299,10 +301,10 @@ class BookingRepository
         if (!$room) {
             return ['status' => false, 'message' => 'Room does not exist.'];
         }
-        $roomEndBookingTime = Carbon::parse($room->end_booking_time)->startOfDay();
+        $roomEndBookingTime = $room->end_booking_time ? Carbon::parse($room->end_booking_time)->startOfDay() : null;
 
 //        if ($room->end_booking_time > $bookingStartDate) {
-        if ($roomEndBookingTime > $bookingStartDate) {
+        if ($roomEndBookingTime && $roomEndBookingTime > $bookingStartDate) {
             return ['status' => false, 'message' => "Room {$room->room_no} is currently {$room->current_status}."];
         }
 
