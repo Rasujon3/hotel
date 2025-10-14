@@ -26,6 +26,6 @@ Route::prefix('v1/bookings')->middleware('auth:sanctum')->group(function () {
     // ✅ User-only routes
     Route::middleware('roles:user')->group(function () {
         Route::post('/create', [BookingController::class, 'store'])->name('bookings.store'); // Create data
-        Route::get('/user-bookings', [BookingController::class, 'userBookings'])->name('bookings.user-bookings');
+        Route::post('/user-booking-list', [BookingController::class, 'userBookings'])->name('bookings.user-bookings');
     });
 });

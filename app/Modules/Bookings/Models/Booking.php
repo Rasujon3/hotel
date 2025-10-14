@@ -138,6 +138,7 @@ class Booking extends Model
     {
         return [
             'booking_id' => 'nullable|exists:bookings,id',
+            'status' => 'nullable|in:pending,confirmed,checked_in,checked_out,cancelled',
         ];
     }
 

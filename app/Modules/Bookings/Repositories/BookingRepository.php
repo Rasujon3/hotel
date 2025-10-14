@@ -432,13 +432,16 @@ class BookingRepository
             return null;
         }
     }
-    public function userBookings($userId, $bookingId)
+    public function userBookings($userId, $bookingId, $status)
     {
         try {
             $data = Booking::with('bookingDetails', 'bookingDetails.hotel', 'bookingDetails.room')
                 ->where('user_id', $userId)
                 ->when($bookingId, function ($query, $bookingId) {
                     $query->where('id', $bookingId);
+                })
+                ->when($status, function ($query, $status) {
+                    $query->where('status', $status);
                 })
                 ->get();
 

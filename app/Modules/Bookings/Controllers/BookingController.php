@@ -201,8 +201,9 @@ class BookingController extends AppBaseController
     {
         $userId = getUser()?->id;
         $bookingId = $request->booking_id ?? null;
+        $status = $request->status ?? null;
 
-        $data = $this->bookingRepository->userBookings($userId, $bookingId);
+        $data = $this->bookingRepository->userBookings($userId, $bookingId, $status);
 
         return $this->sendResponse($data, 'Data retrieved successfully!');
     }
