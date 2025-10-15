@@ -138,13 +138,15 @@ class LoginController extends AppBaseController
         try {
             // Ensure the user is authenticated
             if (!$request->user()) {
-                return $this->sendError('Unauthorized', 401);
+                # return $this->sendError('Unauthorized', 401);
             }
 
             DB::beginTransaction();
 
-            // Delete all tokens for the authenticated user
-            $request->user()->tokens()->delete();
+            if (!$request->user()) {
+                // Delete all tokens for the authenticated user
+                $request->user()->tokens()->delete();
+            }
 
             DB::commit();
 
