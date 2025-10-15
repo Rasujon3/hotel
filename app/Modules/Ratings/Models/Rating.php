@@ -5,6 +5,7 @@ namespace App\Modules\Ratings\Models;
 use App\Models\User;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Rooms\Models\Room;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,7 @@ class Rating extends Model
     ];
 
     protected $hidden = [
+        'created_at',
         'created_by',
         'updated_by',
         'user_id',
@@ -61,6 +63,10 @@ class Rating extends Model
             'user_id' => 'nullable|string|exists:users,id',
             'hotel_id' => 'nullable|string|exists:hotels,id',
         ];
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->format('Y-m-d h:i A') : null;
     }
     public function user() : belongsTo
     {
