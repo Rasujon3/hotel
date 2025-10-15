@@ -175,7 +175,7 @@ class ForgotPasswordController extends AppBaseController
             }
 
             // generate OTP
-            $otp = rand(100000, 999999);
+            $otp = rand(1000, 9999);
             $hashedOtp = Hash::make($otp);
             $expiresAt = Carbon::now()->addMinutes(10);
 
@@ -236,7 +236,7 @@ class ForgotPasswordController extends AppBaseController
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
-            'otp' => 'required|digits:6',
+            'otp' => 'required|digits:4',
         ]);
 
         if ($validator->fails()) {
@@ -252,13 +252,16 @@ class ForgotPasswordController extends AppBaseController
             return response()->json(['status' => false, 'message' => 'Invalid OTP.'], 400);
         }
 
+        /*
         if (Carbon::now()->gt($user->otp_expires_at)) {
             return response()->json(['status' => false, 'message' => 'OTP expired.'], 400);
         }
+        */
 
         return response()->json([
             'status' => true,
             'message' => 'OTP verified successfully.',
+            'otp' => $request->otp,
         ]);
     }
 
@@ -269,7 +272,7 @@ class ForgotPasswordController extends AppBaseController
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
-            'otp' => 'required|digits:6',
+            'otp' => 'required|digits:4',
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
