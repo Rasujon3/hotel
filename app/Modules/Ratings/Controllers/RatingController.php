@@ -23,8 +23,12 @@ class RatingController extends AppBaseController
     // Fetch all data
     public function index(RatingRequest $request)
     {
-        $userId = getUser()?->id;
+        $userId = $request->user_id ?? null;
         $hotelId = $request->hotel_id ?? null;
+
+        if (!$userId && !$hotelId) {
+            return $this->sendError('Nothing found.', 400);
+        }
 
         $data = $this->ratingRepository->all($userId, $hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');

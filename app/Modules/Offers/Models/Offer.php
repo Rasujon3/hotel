@@ -3,6 +3,7 @@
 namespace App\Modules\Offers\Models;
 
 use App\Models\User;
+use App\Modules\Buildings\Models\Building;
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Expenses\Models\ExpenseImg;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,9 @@ class Offer extends Model
 
     protected $fillable = [
         'hotel_id',
+        'building_id',
         'floor_id',
+        'room_id',
         'room_no',
         'start_date',
         'end_date',
@@ -31,7 +34,9 @@ class Offer extends Model
     {
         return [
             'hotel_id'        => ['required', 'integer', 'exists:hotels,id'],
+            'building_id'     => ['required', 'integer', 'exists:buildings,id'],
             'floor_id'        => ['required', 'integer', 'exists:floors,id'],
+            'room_id'        => ['required', 'integer', 'exists:rooms,id'],
             'room_no'         => ['required', 'string', 'max:50'],
             'start_date'      => ['required', 'date', 'before_or_equal:end_date'],
             'end_date'        => ['required', 'date', 'after_or_equal:start_date'],
@@ -65,6 +70,10 @@ class Offer extends Model
     public function hotel() : belongsTo
     {
         return $this->belongsTo(Hotel::class,'hotel_id');
+    }
+    public function building() : belongsTo
+    {
+        return $this->belongsTo(Building::class,'building_id');
     }
     public function images(): HasMany
     {

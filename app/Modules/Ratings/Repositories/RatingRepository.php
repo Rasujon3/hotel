@@ -22,7 +22,9 @@ class RatingRepository
 
         if ($hotelId) {
             $query->where('hotel_id', $hotelId);
-        } else {
+        }
+
+        if ($userId) {
             $query->where('user_id', $userId);
         }
 

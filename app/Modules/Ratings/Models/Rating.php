@@ -58,6 +58,7 @@ class Rating extends Model
     public static function listRules()
     {
         return [
+            'user_id' => 'nullable|string|exists:users,id',
             'hotel_id' => 'nullable|string|exists:hotels,id',
         ];
     }

@@ -4,9 +4,10 @@ use App\Modules\Ratings\Controllers\RatingController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/ratings')->middleware('auth:sanctum')->group(function () {
+    Route::get('/list', [RatingController::class, 'index'])->name('ratings.list'); // List data
     // ✅ Routes accessible by both owner & receptionist
     Route::middleware('roles:owner,receptionist,user')->group(function () {
-        Route::get('/list', [RatingController::class, 'index'])->name('ratings.list'); // List data
+//        Route::get('/list', [RatingController::class, 'index'])->name('ratings.list'); // List data
     });
 
     // ✅ User-only routes

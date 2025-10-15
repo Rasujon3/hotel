@@ -141,9 +141,10 @@ class OfferRepository
             ->exists();
         return $checkNameExist;
     }
-    public function checkExist($hotelId, $floorId, $roomNo)
+    public function checkExist($hotelId,$buildingId, $floorId, $roomNo)
     {
         $checkValid = Room::where('hotel_id', $hotelId)
+            ->where('building_id', $buildingId)
             ->where('floor_id', $floorId)
             ->where('room_no', $roomNo)
             ->exists();

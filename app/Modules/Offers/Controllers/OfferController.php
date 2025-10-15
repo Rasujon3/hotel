@@ -31,7 +31,7 @@ class OfferController extends AppBaseController
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->offerRepository->all($user?->id, $hotelId);
+        $data = $this->offerRepository->all($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
@@ -41,6 +41,7 @@ class OfferController extends AppBaseController
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
+        $buildingId = $request->building_id;
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
 
@@ -48,7 +49,7 @@ class OfferController extends AppBaseController
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkExist = $this->offerRepository->checkExist($hotelId, $floorId, $roomNo);
+        $checkExist = $this->offerRepository->checkExist($hotelId, $buildingId, $floorId, $roomNo);
         if (!$checkExist) {
             return $this->sendError('No data found.', 404);
         }
@@ -78,6 +79,7 @@ class OfferController extends AppBaseController
         $user = getUser();
         $userHotelIds = getUserHotelIds($user?->id, $user?->user_type_id);
         $hotelId = $request->hotel_id;
+        $buildingId = $request->building_id;
         $floorId = $request->floor_id;
         $roomNo = $request->room_no;
 
@@ -85,7 +87,7 @@ class OfferController extends AppBaseController
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $checkExist = $this->offerRepository->checkExist($hotelId, $floorId, $roomNo);
+        $checkExist = $this->offerRepository->checkExist($hotelId, $buildingId, $floorId, $roomNo);
         if (!$checkExist) {
             return $this->sendError('No data found.', 404);
         }
