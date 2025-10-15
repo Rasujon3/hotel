@@ -143,7 +143,7 @@ class LoginController extends AppBaseController
 
             DB::beginTransaction();
 
-            if (!$request->user()) {
+            if ($request->user()) {
                 // Delete all tokens for the authenticated user
                 $request->user()->tokens()->delete();
             }
