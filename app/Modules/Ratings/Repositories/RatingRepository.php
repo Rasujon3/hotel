@@ -121,8 +121,8 @@ class RatingRepository
     {
         $checkValid = Booking::where('user_id', $userId)
             ->where('hotel_id', $hotelId)
-            ->where('status', '!=', 'pending')
-            ->where('status', '!=', 'confirmed')
+            # ->where('status', '!=', 'pending')
+            # ->where('status', '!=', 'confirmed')
             ->exists();
 
         return $checkValid;

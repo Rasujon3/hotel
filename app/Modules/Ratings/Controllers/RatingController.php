@@ -79,7 +79,7 @@ class RatingController extends AppBaseController
         $hotelId = $request->hotel_id;
         $name = $request->name;
 
-        $data = $this->ratingRepository->find($id, $userId);
+        $data = $this->ratingRepository->find($id);
         if (!$data) {
             return $this->sendError('Data not found');
         }
@@ -102,7 +102,7 @@ class RatingController extends AppBaseController
     {
         $userId = getUser()?->id;
 
-        $data = $this->ratingRepository->find($id, $userId);
+        $data = $this->ratingRepository->find($id);
         if (!$data) {
             return $this->sendError('Data not found');
         }
