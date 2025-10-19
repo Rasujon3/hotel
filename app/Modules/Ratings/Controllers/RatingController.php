@@ -84,10 +84,10 @@ class RatingController extends AppBaseController
             return $this->sendError('Data not found');
         }
 
-        $checkValid = $this->ratingRepository->checkValid($userId, $hotelId);
-        if ($checkValid) {
-            return $this->sendError('Already added rating for this hotel.', 409);
-        }
+//        $checkValid = $this->ratingRepository->checkValid($userId, $hotelId);
+//        if ($checkValid) {
+//            return $this->sendError('Already added rating for this hotel.', 409);
+//        }
 
         $updated = $this->ratingRepository->update($data, $request->all(), $userId);
         if (!$updated) {

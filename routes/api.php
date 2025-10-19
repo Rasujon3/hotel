@@ -15,8 +15,8 @@ Route::prefix('/v1')->middleware('api')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('user.logout');
     Route::post('/register', [RegisterController::class, 'register']);
     Route::get('/user-info', [RegisterController::class, 'userInfo'])->name('user.info')->middleware(['auth:sanctum', 'roles:user,owner,receptionist']);
-    Route::post('/user-profile-update', [RegisterController::class, 'userProfileUpdate'])->name('user.profile.update')->middleware(['auth:sanctum', 'roles:user']);
-    Route::post('/change-password', [RegisterController::class, 'changePassword'])->name('user.change-password')->middleware(['auth:sanctum', 'roles:user']);
+    Route::post('/user-profile-update', [RegisterController::class, 'userProfileUpdate'])->name('user.profile.update')->middleware(['auth:sanctum', 'roles:user,owner,receptionist']);
+    Route::post('/change-password', [RegisterController::class, 'changePassword'])->name('user.change-password')->middleware(['auth:sanctum', 'roles:user,owner,receptionist']);
 
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetRequest']); // OTP or Email
     Route::post('/verify-reset-otp', [ForgotPasswordController::class, 'verifyResetOtp']); // OTP verification
