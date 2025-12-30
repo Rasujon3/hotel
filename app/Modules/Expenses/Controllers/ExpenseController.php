@@ -29,7 +29,7 @@ class ExpenseController extends AppBaseController
             return $this->sendError('You can not access this data.', 403);
         }
 
-        $data = $this->expenseRepository->all($user?->id, $hotelId);
+        $data = $this->expenseRepository->all($hotelId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 

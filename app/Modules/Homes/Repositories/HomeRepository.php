@@ -70,7 +70,16 @@ class HomeRepository
         $data = Hotel::with('ratings', 'images')
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
+            ->withMin(['rooms as rooms_min_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
+            ->withMax(['rooms as rooms_max_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
             ->where('status', 'Active')
+            ->orderByDesc('system_commission')
             ->paginate(10);
 
         // map on the paginator items
@@ -81,6 +90,10 @@ class HomeRepository
                 'address'      => $hotel->hotel_address,
                 'avg_rating'   => round($hotel->ratings_avg_rating, 1),
                 'rating_count' => $hotel->ratings_count,
+
+                'min_room_price'  => $hotel->rooms_min_rent,
+                'max_room_price'  => $hotel->rooms_max_rent,
+
                 'images'       => $hotel->images,
             ];
         });

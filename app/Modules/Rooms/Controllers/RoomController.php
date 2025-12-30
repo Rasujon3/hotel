@@ -61,7 +61,7 @@ class RoomController extends AppBaseController
             return $this->sendError('Please add system commission.', 400);
         }
 
-        $store = $this->roomRepository->store($request->all(), $user?->id);
+        $store = $this->roomRepository->store($request->all(), $user?->id, $checkSystemCommission);
         if (!$store) {
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
         }

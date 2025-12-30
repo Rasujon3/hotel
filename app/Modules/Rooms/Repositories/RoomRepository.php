@@ -23,11 +23,21 @@ class RoomRepository
 
         return $data;
     }
-    public function store(array $data, $userId)
+    public function store(array $data, $userId, $checkSystemCommission)
     {
         DB::beginTransaction();
         try {
-            $rent = $data['rent'];
+            $roomPrice = $data['room_price'];
+            $discount = $data['discount'];
+
+            $rent = $this->calculateRentPrice($roomPrice, $discount);
+            $data['rent'] = $rent;
+
+            $discountAmount = $this->calculateDiscountAmount($roomPrice, $discount);
+            $data['discount_amount'] = $discountAmount;
+
+            $data['system_commission'] = $checkSystemCommission;
+
             $hotelId = $data['hotel_id'];
             $floorId = $data['floor_id'];
             $bookingPercentage = $this->checkBookingPercentage($hotelId);
@@ -81,8 +91,7 @@ class RoomRepository
             Log::error('Error in storing data: ' , [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine()
             ]);
 
             return null;
@@ -94,7 +103,15 @@ class RoomRepository
         try {
             $data['updated_by'] = $userId;
 
-            $rent = $data['rent'] ?? $room->rent;
+            $roomPrice = $data['room_price'];
+            $discount = $data['discount'];
+
+            $rent = $this->calculateRentPrice($roomPrice, $discount);
+            $data['rent'] = $rent;
+
+            $discountAmount = $this->calculateDiscountAmount($roomPrice, $discount);
+            $data['discount_amount'] = $discountAmount;
+
             $hotelId = $data['hotel_id'];
             $floorId = $data['floor_id'];
             $bookingPercentage = $this->checkBookingPercentage($hotelId);
@@ -158,8 +175,7 @@ class RoomRepository
             Log::error('Error updating data: ' , [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine()
             ]);
 
             return null;
@@ -199,8 +215,7 @@ class RoomRepository
                 'id' => $room->id,
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine()
             ]);
 
             return false;
@@ -249,5 +264,21 @@ class RoomRepository
     {
         $checkSystemCommission = Hotel::where('id', $hotelId)->value('system_commission');
         return $checkSystemCommission > 0;
+    }
+    private function calculateRentPrice($roomPrice, $discount)
+    {
+        $rent = $roomPrice;
+        if (!empty($discount) && is_numeric($discount) && $discount > 0) {
+            $rent = $roomPrice - (($roomPrice * $discount) / 100);
+        }
+        return $rent;
+    }
+    private function calculateDiscountAmount($roomPrice, $discount)
+    {
+        $discountAmount = 0;
+        if (!empty($discount) && is_numeric($discount) && $discount > 0) {
+            $discountAmount = ($roomPrice * $discount) / 100;
+        }
+        return $discountAmount;
     }
 }

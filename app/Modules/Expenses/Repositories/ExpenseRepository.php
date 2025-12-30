@@ -14,11 +14,10 @@ use Exception;
 
 class ExpenseRepository
 {
-    public function all($userId, $hotelId)
+    public function all($hotelId)
     {
         $data = Expense::with('images', 'hotel')
             ->where('hotel_id', $hotelId)
-            ->where('user_id', $userId)
             ->get();
 
         $totalSpends = Expense::sum('amount');
