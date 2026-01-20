@@ -192,6 +192,7 @@ class HomeRepository
     public function roomDetails($hotelId, $buildingId, $floorId, $bookingStartDate = null, $bookingEndDate = null)
     {
         // Count available rooms considering date range
+        /*
         $availableRooms = Room::where('hotel_id', $hotelId)
             ->where('building_id', $buildingId)
             ->where('status', 'Active')
@@ -205,9 +206,10 @@ class HomeRepository
                     });
             })
             ->count();
+        */
 
         // Fetch available room data
-        $data = Room::with('floor', 'images', 'hotel')
+        $query = Room::with('floor', 'images', 'hotel')
             ->where('hotel_id', $hotelId)
             ->where('floor_id', $floorId)
             ->where('status', 'Active')
@@ -219,8 +221,10 @@ class HomeRepository
                                 #->orWhere('start_booking_time', '>', $bookingEndDate);
                         });
                     });
-            })
-            ->get();
+            });
+
+        $availableRooms = $query->count();
+        $data = $query->get();
 
         return [
             'availableRooms' => $availableRooms,
