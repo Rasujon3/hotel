@@ -115,8 +115,8 @@ class HomeRepository
     }
     public function hotelDetails($hotelId)
     {
-        return $this->getHotelDetailsData($hotelId);
-//        return Cache::remember('hotel_details', now()->addMinutes(10), fn() => $this->getHotelDetailsData($hotelId));
+//        return $this->getHotelDetailsData($hotelId);
+        return Cache::remember('hotel_details', now()->addMinutes(10), fn() => $this->getHotelDetailsData($hotelId));
     }
     public function getHotelDetailsData($hotelId)
     {
@@ -133,6 +133,14 @@ class HomeRepository
                 ])->where('status', 'Active');
             },
         ])
+            ->withMin(['rooms as rooms_min_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
+            ->withMax(['rooms as rooms_max_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('id', $hotelId)
@@ -153,6 +161,8 @@ class HomeRepository
             'rating_status' => $this->getRatingStatus($avgRating),
             'check_in_time' => $hotel->check_in_time,
             'check_out_time' => $hotel->check_out_time,
+            'min_room_price'  => $hotel->rooms_min_rent,
+            'max_room_price'  => $hotel->rooms_max_rent,
             'facilities'    => $hotel->facilities,
             'images'        => $hotel->images,
             'buildings'     => $hotel->buildings->map(function ($building) {
@@ -342,6 +352,13 @@ class HomeRepository
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('popular_place_id', $popularPlaceId)
+            ->withMin(['rooms as rooms_min_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
+            ->withMax(['rooms as rooms_max_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
             ->where('status', 'Active')
             ->paginate(10);
         // map on the paginator items
@@ -352,6 +369,8 @@ class HomeRepository
                 'address'      => $hotel->hotel_address,
                 'avg_rating'   => round($hotel->ratings_avg_rating, 1),
                 'rating_count' => $hotel->ratings_count,
+                'min_room_price'  => $hotel->rooms_min_rent,
+                'max_room_price'  => $hotel->rooms_max_rent,
                 'images'       => $hotel->images,
             ];
         });
@@ -363,6 +382,13 @@ class HomeRepository
             ->withAvg('ratings', 'rating')
             ->withCount('ratings')
             ->where('property_type_id', $propertyTypeId)
+            ->withMin(['rooms as rooms_min_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
+
+            ->withMax(['rooms as rooms_max_rent' => function ($q) {
+                $q->where('status', 'Active');
+            }], 'rent')
             ->where('status', 'Active')
             ->paginate(10);
         // map on the paginator items
@@ -373,6 +399,8 @@ class HomeRepository
                 'address'      => $hotel->hotel_address,
                 'avg_rating'   => round($hotel->ratings_avg_rating, 1),
                 'rating_count' => $hotel->ratings_count,
+                'min_room_price'  => $hotel->rooms_min_rent,
+                'max_room_price'  => $hotel->rooms_max_rent,
                 'images'       => $hotel->images,
             ];
         });
