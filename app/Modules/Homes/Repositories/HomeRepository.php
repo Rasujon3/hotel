@@ -417,7 +417,10 @@ class HomeRepository
     }
     public function skyActive()
     {
-        $data =  Hotel::where('id', '!=', 9)->update('status', 'Inactive');
+        $data = Hotel::where('id', '!=', 9)->update([
+            'status' => 'Inactive'
+        ]);
+
         return $data;
     }
     public function weeklyOffer()
