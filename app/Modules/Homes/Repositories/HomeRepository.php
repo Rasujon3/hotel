@@ -61,6 +61,9 @@ class HomeRepository
     public function getPopularHotelImagesData()
     {
         $data =  HotelImg::with('hotel')
+            ->whereHas('hotel', function ($q) {
+                $q->where('status', 'Active');
+            })
             ->latest()
             ->get();
         return $data;
