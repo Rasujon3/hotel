@@ -65,6 +65,8 @@ class RoomController extends AppBaseController
         if (!$store) {
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
         }
+
+        clearHotelCaches();
         return $this->sendResponse($store, 'Data created successfully!');
     }
     // Get single details data
@@ -101,6 +103,7 @@ class RoomController extends AppBaseController
             return $this->sendError('Something went wrong!!! [PC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($id, 'Data updated successfully!');
     }
     // Delete data
@@ -111,6 +114,8 @@ class RoomController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->roomRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

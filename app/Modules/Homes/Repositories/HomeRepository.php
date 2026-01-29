@@ -415,6 +415,11 @@ class HomeRepository
         $data =  PopularPlace::where('status', 'Active')->paginate(10);
         return $data;
     }
+    public function skyActive()
+    {
+        $data =  Hotel::where('id', '!=', 9)->update('status', 'Inactive');
+        return $data;
+    }
     public function weeklyOffer()
     {
         // 1. Calculate today and 6 days ahead

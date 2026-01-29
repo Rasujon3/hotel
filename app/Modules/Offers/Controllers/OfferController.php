@@ -59,6 +59,7 @@ class OfferController extends AppBaseController
             return $this->sendError('Something went wrong!!! [EC-01]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($store, 'Data created successfully!');
     }
 
@@ -102,6 +103,7 @@ class OfferController extends AppBaseController
             return $this->sendError('Something went wrong!!! [OC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($updated, 'Data updated successfully!');
     }
 
@@ -113,6 +115,8 @@ class OfferController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->offerRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

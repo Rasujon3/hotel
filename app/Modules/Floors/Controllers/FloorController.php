@@ -63,6 +63,7 @@ class FloorController extends AppBaseController
             return $this->sendError('Something went wrong!!! [FC-01]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($store, 'Data created successfully!');
     }
 
@@ -100,6 +101,7 @@ class FloorController extends AppBaseController
             return $this->sendError('Something went wrong!!! [FC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($floor, 'Data updated successfully!');
     }
 
@@ -111,6 +113,8 @@ class FloorController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->floorRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

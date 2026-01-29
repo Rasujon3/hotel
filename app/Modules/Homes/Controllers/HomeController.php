@@ -90,6 +90,11 @@ class HomeController extends AppBaseController
         $data = $this->homeRepository->hotelByPropertyType($propertyTypeId);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+    public function skyActive()
+    {
+        $data = $this->homeRepository->hotelByPropertyType($propertyTypeId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
     public function weeklyOffer()
     {
         $data = $this->homeRepository->weeklyOffer();

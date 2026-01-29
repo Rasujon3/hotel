@@ -33,6 +33,8 @@ class PopularPlaceController extends AppBaseController
             return $this->sendError('Something went wrong!!! [PPC-01]', 500);
         }
 
+        clearHotelCaches();
+
         return $this->sendResponse($store, 'Data created successfully!');
     }
     // Get single details data
@@ -60,6 +62,7 @@ class PopularPlaceController extends AppBaseController
             return $this->sendError('Something went wrong!!! [HC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($updated, 'Data updated successfully!');
     }
     // Delete data
@@ -70,6 +73,8 @@ class PopularPlaceController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->popularPlaceRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

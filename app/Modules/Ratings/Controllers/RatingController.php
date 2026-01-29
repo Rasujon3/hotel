@@ -56,6 +56,7 @@ class RatingController extends AppBaseController
             return $this->sendError('Something went wrong!!! [RC-01]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($store, 'Data created successfully!');
     }
 
@@ -94,6 +95,7 @@ class RatingController extends AppBaseController
             return $this->sendError('Something went wrong!!! [FC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($updated, 'Data updated successfully!');
     }
 
@@ -107,6 +109,8 @@ class RatingController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->ratingRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

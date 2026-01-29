@@ -55,6 +55,7 @@ class BuildingController extends AppBaseController
             return $this->sendError('Something went wrong!!! [BC-01]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($store, 'Data created successfully!');
     }
 
@@ -91,6 +92,7 @@ class BuildingController extends AppBaseController
             return $this->sendError('Something went wrong!!! [FC-02]', 500);
         }
 
+        clearHotelCaches();
         return $this->sendResponse($updated, 'Data updated successfully!');
     }
 
@@ -102,6 +104,8 @@ class BuildingController extends AppBaseController
             return $this->sendError('Data not found');
         }
         $this->buildingRepository->delete($data);
+
+        clearHotelCaches();
         return $this->sendSuccess('Data deleted successfully!');
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Modules\Hotels\Models\Hotel;
 use App\Modules\Receptionists\Models\Receptionist;
+use Illuminate\Support\Facades\Cache;
 
 function getUser()
 {
@@ -57,6 +58,22 @@ if (!function_exists('formatBangladeshPhone')) {
 
         // If invalid length, return as is or handle error
         return $phone;
+    }
+}
+if (!function_exists('clearHotelCaches')) {
+    function clearHotelCaches()
+    {
+        $keys = [
+            'popular_hotel_images',
+            'popular_hotels',
+            'property_type',
+            'hotel_details',
+            'popular_places',
+        ];
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
     }
 }
 
