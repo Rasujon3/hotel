@@ -38,6 +38,7 @@ class Home extends Model
     {
         return [
             'hotel_id' => 'required|exists:hotels,id',
+            'building_id' => 'nullable|exists:buildings,id',
         ];
     }
 

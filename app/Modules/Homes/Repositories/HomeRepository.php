@@ -2,6 +2,7 @@
 
 namespace App\Modules\Homes\Repositories;
 
+use App\Modules\Buildings\Models\Building;
 use App\Modules\Facilities\Models\Facility;
 use App\Modules\Floors\Models\Floor;
 use App\Modules\Floors\Models\FloorImg;
@@ -459,5 +460,23 @@ class HomeRepository
             'heading' => $heading,
             'offers'  => $offers,
         ];
+    }
+    public function checkBuildingExists($hotelId, $buildingId)
+    {
+        $exists = Building::where('id', $buildingId)
+            ->where('hotel_id', $hotelId)
+            ->exists();
+
+        return $exists;
+    }
+    public function getRooms($hotelId, $buildingId)
+    {
+        $exists = Room::with('images')
+            ->where('building_id', $buildingId)
+            ->where('hotel_id', $hotelId)
+            ->where('status', 'Active')
+            ->get();
+
+        return $exists;
     }
 }
