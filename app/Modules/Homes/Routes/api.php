@@ -9,6 +9,7 @@ Route::prefix('v1/homes')->group(function () {
     Route::get('/property-type', [HomeController::class, 'propertyType'])->name('homes.property-type'); // List data
     Route::post('/search-by-area', [HomeController::class, 'searchByArea'])->name('homes.search-by-area'); // List data
     Route::post('/hotel-details', [HomeController::class, 'hotelDetails'])->name('homes.hotel-details'); // List data
+    Route::post('/hotel-rooms', [HomeController::class, 'hotelRooms'])->name('homes.hotel-rooms'); // List data
     Route::post('/room-details', [HomeController::class, 'roomDetails'])->name('homes.room-details'); // List data
     Route::get('/popular-places', [HomeController::class, 'PopularPlaces'])->name('homes.popular-places'); // List data
     Route::post('/hotels-by-popular-place', [HomeController::class, 'hotelsByPopularPlace'])->name('homes.hotels-by-popular-place'); // List data

@@ -38,7 +38,14 @@ class Home extends Model
     {
         return [
             'hotel_id' => 'required|exists:hotels,id',
-            'building_id' => 'nullable|exists:buildings,id',
+        ];
+    }
+
+    public static function hotelRoomsRules()
+    {
+        return [
+            'hotel_id' => 'required|exists:hotels,id',
+            'building_id' => 'required|exists:buildings,id',
         ];
     }
 
