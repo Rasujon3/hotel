@@ -54,18 +54,13 @@ class HomeController extends AppBaseController
     public function hotelDetails(HomeRequest $request)
     {
         $hotelId = $request->hotel_id;
-        $buildingId = $request->building_id;
-
-        if (!empty($buildingId)) {
-            $checkBuildingExists = $this->homeRepository->checkBuildingExists($hotelId, $buildingId);
-            if (!$checkBuildingExists) {
-                return $this->sendError('Building does not belong to this hotel.', 400);
-            }
-            $data = $this->homeRepository->getRooms($hotelId, $buildingId);
-            return $this->sendResponse($data, 'Data retrieved successfully.');
-        }
 
         $data = $this->homeRepository->hotelDetails($hotelId);
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+    public function hotelRooms(HomeRequest $request)
+    {
+        $data = $this->homeRepository->getRooms($request->hotel_id, $request->building_id);
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
