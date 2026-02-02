@@ -56,6 +56,10 @@ class HomeRequest extends FormRequest
             return Home::hotelDetailsRules();
         }
 
+        if ($routeName === 'homes.hotel-rooms') {
+            return Home::hotelRoomsRules();
+        }
+
         if ($routeName === 'homes.room-details') {
             return Home::roomDetailsRules();
         }
